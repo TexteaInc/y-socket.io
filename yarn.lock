@@ -449,6 +449,192 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@socket.io/component-emitter@npm:~3.1.0":
+  version: 3.1.0
+  resolution: "@socket.io/component-emitter@npm:3.1.0"
+  checksum: db069d95425b419de1514dffe945cc439795f6a8ef5b9465715acf5b8b50798e2c91b8719cbf5434b3fe7de179d6cdcd503c277b7871cb3dd03febb69bdd50fa
+  languageName: node
+  linkType: hard
+
+"@swc/core-android-arm-eabi@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-android-arm-eabi@npm:1.2.242"
+  dependencies:
+    "@swc/wasm": 1.2.122
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@swc/core-android-arm64@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-android-arm64@npm:1.2.242"
+  dependencies:
+    "@swc/wasm": 1.2.130
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@swc/core-darwin-arm64@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-darwin-arm64@npm:1.2.242"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@swc/core-darwin-x64@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-darwin-x64@npm:1.2.242"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@swc/core-freebsd-x64@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-freebsd-x64@npm:1.2.242"
+  dependencies:
+    "@swc/wasm": 1.2.130
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@swc/core-linux-arm-gnueabihf@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.2.242"
+  dependencies:
+    "@swc/wasm": 1.2.130
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@swc/core-linux-arm64-gnu@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-linux-arm64-gnu@npm:1.2.242"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@swc/core-linux-arm64-musl@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-linux-arm64-musl@npm:1.2.242"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@swc/core-linux-x64-gnu@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-linux-x64-gnu@npm:1.2.242"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@swc/core-linux-x64-musl@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-linux-x64-musl@npm:1.2.242"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@swc/core-win32-arm64-msvc@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-win32-arm64-msvc@npm:1.2.242"
+  dependencies:
+    "@swc/wasm": 1.2.130
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@swc/core-win32-ia32-msvc@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-win32-ia32-msvc@npm:1.2.242"
+  dependencies:
+    "@swc/wasm": 1.2.130
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@swc/core-win32-x64-msvc@npm:1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core-win32-x64-msvc@npm:1.2.242"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@swc/core@npm:^1.2.242":
+  version: 1.2.242
+  resolution: "@swc/core@npm:1.2.242"
+  dependencies:
+    "@swc/core-android-arm-eabi": 1.2.242
+    "@swc/core-android-arm64": 1.2.242
+    "@swc/core-darwin-arm64": 1.2.242
+    "@swc/core-darwin-x64": 1.2.242
+    "@swc/core-freebsd-x64": 1.2.242
+    "@swc/core-linux-arm-gnueabihf": 1.2.242
+    "@swc/core-linux-arm64-gnu": 1.2.242
+    "@swc/core-linux-arm64-musl": 1.2.242
+    "@swc/core-linux-x64-gnu": 1.2.242
+    "@swc/core-linux-x64-musl": 1.2.242
+    "@swc/core-win32-arm64-msvc": 1.2.242
+    "@swc/core-win32-ia32-msvc": 1.2.242
+    "@swc/core-win32-x64-msvc": 1.2.242
+  dependenciesMeta:
+    "@swc/core-android-arm-eabi":
+      optional: true
+    "@swc/core-android-arm64":
+      optional: true
+    "@swc/core-darwin-arm64":
+      optional: true
+    "@swc/core-darwin-x64":
+      optional: true
+    "@swc/core-freebsd-x64":
+      optional: true
+    "@swc/core-linux-arm-gnueabihf":
+      optional: true
+    "@swc/core-linux-arm64-gnu":
+      optional: true
+    "@swc/core-linux-arm64-musl":
+      optional: true
+    "@swc/core-linux-x64-gnu":
+      optional: true
+    "@swc/core-linux-x64-musl":
+      optional: true
+    "@swc/core-win32-arm64-msvc":
+      optional: true
+    "@swc/core-win32-ia32-msvc":
+      optional: true
+    "@swc/core-win32-x64-msvc":
+      optional: true
+  bin:
+    swcx: run_swcx.js
+  checksum: 1f5473c7af0f714c99d632c85322f0e72d2cac6fc99d0bdd389ab12818107da2c71c34ce43476a72533f9f342d1ec116feed5380afae9be2edf456d8ecc0a423
+  languageName: node
+  linkType: hard
+
+"@swc/wasm@npm:1.2.122":
+  version: 1.2.122
+  resolution: "@swc/wasm@npm:1.2.122"
+  checksum: 563345370c5ad18373d3b403590ab880fe52dcd8fc8c8601be263fcd9886520b28a7f4e46236cf49ca2b136c79d4ef50c960bc34b7cdc2068118b0d84dfca1f4
+  languageName: node
+  linkType: hard
+
+"@swc/wasm@npm:1.2.130":
+  version: 1.2.130
+  resolution: "@swc/wasm@npm:1.2.130"
+  checksum: 02203bfef3e382c64cbbd63c138c8fdf61865e74d923b317e9d9e9f33f5a3f0a9533b5fdbc9505e76d78e864be04a82fc847eb987a1e47ccac5850146c858292
+  languageName: node
+  linkType: hard
+
+"@textea/dev-kit@npm:^0.11.10":
+  version: 0.11.10
+  resolution: "@textea/dev-kit@npm:0.11.10"
+  peerDependencies:
+    "@emotion/react": "*"
+    "@emotion/styled": "*"
+    "@mui/material": ^5
+    uuid: ^8
+  checksum: 4e1d2d4ec10507d795f768f43b21bd3b1c66e3067793cfc83e00172faa599570799e3872cc2ff7c1a7abff09125aea5fbb7a49f7ab0f5a8b0bbc0e0d8adce6cb
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -607,7 +793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:>=12":
+"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:>=12, @types/node@npm:^18.7.13":
   version: 18.7.13
   resolution: "@types/node@npm:18.7.13"
   checksum: 45431e7e89ecaf85c7d2c180d801c132a7c59e2f8ad578726b6d71cc74e3267c18f9ccdcad738bc0479790c078f0c79efb0e58da2c6be535c15995dbb19050c9
@@ -652,12 +838,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:^8.5.3":
-  version: 8.5.3
-  resolution: "@types/ws@npm:8.5.3"
-  dependencies:
-    "@types/node": "*"
-  checksum: 0ce46f850d41383fcdc2149bcacc86d7232fa7a233f903d2246dff86e31701a02f8566f40af5f8b56d1834779255c04ec6ec78660fe0f9b2a69cf3d71937e4ae
+"@types/web@npm:^0.0.72":
+  version: 0.0.72
+  resolution: "@types/web@npm:0.0.72"
+  checksum: 7b388fbcaf470788d51464a915bb5f29a6252333a045885c033e0280e48666446a74f03cfad07219426ead5133a3a6e2e8c8c462454b66063ef238e18d288506
   languageName: node
   linkType: hard
 
@@ -1746,6 +1930,19 @@ __metadata:
   dependencies:
     iconv-lite: ^0.6.2
   checksum: bb98632f8ffa823996e508ce6a58ffcf5856330fde839ae42c9e1f436cc3b5cc651d4aeae72222916545428e54fd0f6aa8862fd8d25bdbcc4589f1e3f3715e7f
+  languageName: node
+  linkType: hard
+
+"engine.io-client@npm:~6.2.1":
+  version: 6.2.2
+  resolution: "engine.io-client@npm:6.2.2"
+  dependencies:
+    "@socket.io/component-emitter": ~3.1.0
+    debug: ~4.3.1
+    engine.io-parser: ~5.0.3
+    ws: ~8.2.3
+    xmlhttprequest-ssl: ~2.0.0
+  checksum: bda989d88d663cda5f1fbe6b235dba35b80ba9e947685b94b40d3daf4545ccdcb54232d2ad210bbe9b5e0b73b0e019b54716d1285ed300e1f1c7ad97fd6cafaf
   languageName: node
   linkType: hard
 
@@ -3693,7 +3890,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.21":
+"lodash@npm:^4.17.15, lodash@npm:^4.17.19":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -5106,6 +5303,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"socket.io-client@npm:^4.5.1":
+  version: 4.5.1
+  resolution: "socket.io-client@npm:4.5.1"
+  dependencies:
+    "@socket.io/component-emitter": ~3.1.0
+    debug: ~4.3.2
+    engine.io-client: ~6.2.1
+    socket.io-parser: ~4.2.0
+  checksum: e6e5ff1bb4b5714195b961274925cf23de81e070258d2ec1c8e12fcd9cebf4b4725c5fcff58699b23de8a260884f272f4e7e1e1146c0c72b75028fc438d069aa
+  languageName: node
+  linkType: hard
+
 "socket.io-parser@npm:~4.0.4":
   version: 4.0.5
   resolution: "socket.io-parser@npm:4.0.5"
@@ -5114,6 +5323,16 @@ __metadata:
     component-emitter: ~1.3.0
     debug: ~4.3.1
   checksum: 8b60cf3abb9c3571f90cf894d40f41459ab007e6cee7ca8ee28ab107d76ded4a72ca5c4e5dcb82d996d4f78b3689dd3eb36ba0b39a66e25e2e9a9afa276c81c5
+  languageName: node
+  linkType: hard
+
+"socket.io-parser@npm:~4.2.0":
+  version: 4.2.1
+  resolution: "socket.io-parser@npm:4.2.1"
+  dependencies:
+    "@socket.io/component-emitter": ~3.1.0
+    debug: ~4.3.1
+  checksum: 2582202f22538d7e6b4436991378cb4cea3b2f8219cda24923ae35afd291ab5ad6120e7d093e41738256b6c6ad10c667dd25753c2d9a2340fead04e9286f152d
   languageName: node
   linkType: hard
 
@@ -5958,6 +6177,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"xmlhttprequest-ssl@npm:~2.0.0":
+  version: 2.0.0
+  resolution: "xmlhttprequest-ssl@npm:2.0.0"
+  checksum: 1e98df67f004fec15754392a131343ea92e6ab5ac4d77e842378c5c4e4fd5b6a9134b169d96842cc19422d77b1606b8df84a5685562b3b698cb68441636f827e
+  languageName: node
+  linkType: hard
+
 "y-protocols@npm:^1.0.5":
   version: 1.0.5
   resolution: "y-protocols@npm:1.0.5"
@@ -5975,9 +6201,12 @@ __metadata:
     "@clerk/clerk-sdk-node": ^4.1.1
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-angular": ^17.0.3
+    "@swc/core": ^1.2.242
+    "@textea/dev-kit": ^0.11.10
     "@types/cookie": ^0.5.1
     "@types/express": ^4.17.13
-    "@types/ws": ^8.5.3
+    "@types/node": ^18.7.13
+    "@types/web": ^0.0.72
     "@typescript-eslint/eslint-plugin": ^5.33.0
     "@typescript-eslint/parser": ^5.33.0
     "@vitest/ui": ^0.22.1
@@ -5996,9 +6225,9 @@ __metadata:
     husky: ^8.0.1
     lib0: ^0.2.52
     lint-staged: ^13.0.3
-    lodash: ^4.17.21
     prettier: ^2.7.1
     socket.io: ^4.5.1
+    socket.io-client: ^4.5.1
     ts-node: ^10.9.1
     typescript: ^4.7.4
     vite: ^3.0.9

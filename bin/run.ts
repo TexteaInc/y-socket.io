@@ -1,5 +1,5 @@
 #!/usr/bin/env ts-node
-import { createYDocServer } from '../src/server'
+import { createYDocServer } from '../src'
 
 const host = process.env.HOST || 'localhost'
 const port = +(process.env.PORT || 1234)
