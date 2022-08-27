@@ -36,7 +36,7 @@ export const createSocketServer = (httpServer: HTTPServer) => {
         // todo: bind persistence
         yDoc.on('update', (update: Uint8Array, origin: string) => {
           const updateV2 = Y.convertUpdateFormatV1ToV2(update)
-          io.to(roomName).except(origin).emit('doc:update', updateV2)
+          io.to(roomName).except(origin).emit('yDoc:update', updateV2)
         })
         const awareness = new Awareness(yDoc)
         awareness.on('update', (changes: AwarenessChanges, origin: string) => {
@@ -52,21 +52,21 @@ export const createSocketServer = (httpServer: HTTPServer) => {
         roomMap.set(roomName, room)
       }
       const yDocDiff = Y.encodeStateVector(room.yDoc)
-      socket.emit('doc:diff', yDocDiff)
+      socket.emit('yDoc:diff', yDocDiff)
       const clients = [...room.awareness.getStates().keys()].filter(clientId => clientId !== room.yDoc.clientID)
       const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
       socket.emit('awareness:update', awarenessUpdate)
     })
-    socket.on('doc:diff', (roomName, diff) => {
+    socket.on('yDoc:diff', (roomName, diff) => {
       const room = roomMap.get(roomName)
       if (!room) {
         console.error('room is null')
       } else {
         const update = Y.encodeStateAsUpdateV2(room.yDoc, diff)
-        socket.emit('doc:update', update)
+        socket.emit('yDoc:update', update)
       }
     })
-    socket.on('doc:update', (roomName, update) => {
+    socket.on('yDoc:update', (roomName, update) => {
       const room = roomMap.get(roomName)
       if (!room) {
         console.error('room is null')

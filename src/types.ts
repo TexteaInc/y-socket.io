@@ -9,15 +9,15 @@ export interface Room {
 }
 
 export interface ServerToClientEvents {
-  'doc:diff': (diff: ArrayBuffer) => void
-  'doc:update': (update: ArrayBuffer) => void
+  'yDoc:diff': (diff: ArrayBuffer) => void
+  'yDoc:update': (update: ArrayBuffer) => void
   'awareness:update': (update: ArrayBuffer) => void
 }
 
 export interface ClientToServerEvents {
   join: (roomName: string) => void
 
-  'doc:diff': (roomName: string, diff: Uint8Array) => void
-  'doc:update': (roomName: string, update: Uint8Array) => void
+  'yDoc:diff': (roomName: string, diff: Uint8Array) => void
+  'yDoc:update': (roomName: string, update: Uint8Array) => void
   'awareness:update': (roomName: string, update: Uint8Array) => void
 }

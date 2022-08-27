@@ -38,17 +38,17 @@ export class SocketIOProvider extends Observable<string> {
     this.socket.on('connect', () => {
       this.socket.emit('join', roomName)
       const yDocDiff = Y.encodeStateVector(this.yDoc)
-      this.socket.emit('doc:diff', roomName, yDocDiff)
+      this.socket.emit('yDoc:diff', roomName, yDocDiff)
       if (this.awareness.getLocalState() !== null) {
         const awarenessUpdate = encodeAwarenessUpdate(this.awareness, [this.yDoc.clientID])
         this.socket.emit('awareness:update', roomName, awarenessUpdate)
       }
     })
-    this.socket.on('doc:diff', (diff) => {
+    this.socket.on('yDoc:diff', (diff) => {
       const update = Y.encodeStateAsUpdateV2(this.yDoc, new Uint8Array(diff))
-      this.socket.emit('doc:update', roomName, update)
+      this.socket.emit('yDoc:update', roomName, update)
     })
-    this.socket.on('doc:update', (update) => {
+    this.socket.on('yDoc:update', (update) => {
       Y.applyUpdateV2(this.yDoc, new Uint8Array(update), this)
     })
     this.socket.on('awareness:update', (update) => {
@@ -61,7 +61,7 @@ export class SocketIOProvider extends Observable<string> {
     this.handleUpdate = (update, origin) => {
       if (origin !== this) {
         const updateV2 = Y.convertUpdateFormatV1ToV2(update)
-        this.socket.emit('doc:update', roomName, updateV2)
+        this.socket.emit('yDoc:update', roomName, updateV2)
       }
     }
     this.yDoc.on('update', this.handleUpdate)
