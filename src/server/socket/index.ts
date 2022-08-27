@@ -21,7 +21,9 @@ import type { AwarenessChanges, ClientToServerEvents, Room, ServerToClientEvents
 export const createSocketServer = (httpServer: HTTPServer) => {
   const roomMap = new Map<string, Room>()
 
-  const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer)
+  const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
+    cors: process.env.NODE_ENV === 'development' ? {} : undefined
+  })
 
   io.on('connection', (socket) => {
     socket.on('join', (roomName) => {
