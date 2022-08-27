@@ -2,9 +2,14 @@
   "name": "y-socket.io",
   "version": "0.0.2",
   "private": true,
+  "workspaces": [
+    ".",
+    "example"
+  ],
   "scripts": {
     "start": "./bin/run.ts",
-    "server:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch src/server ./bin/run.ts",
+    "start:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch src/server ./bin/run.ts",
+    "example": "yarn workspace y-socket.io-example dev",
     "test": "run -T vitest",
     "test:ui": "run -T vitest --ui",
     "test:run": "run -T vitest run"

@@ -15,8 +15,8 @@ export class SocketIOProvider extends Observable<string> {
   private readonly awareness: Awareness
   private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>
 
-  private readonly handleUpdate: (update: Uint8Array, origin: this | null) => void
-  private readonly handleAwarenessUpdate: (changes: AwarenessChanges, origin: 'local' | this | null) => void
+  private readonly handleUpdate: (update: Uint8Array, origin: null | this) => void
+  private readonly handleAwarenessUpdate: (changes: AwarenessChanges, origin: 'local' | this) => void
   private readonly handleBeforeUnload: () => void
 
   constructor (
