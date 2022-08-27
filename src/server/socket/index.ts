@@ -54,8 +54,10 @@ export const createSocketServer = (httpServer: HTTPServer) => {
       const yDocDiff = Y.encodeStateVector(room.yDoc)
       socket.emit('yDoc:diff', yDocDiff)
       const clients = [...room.awareness.getStates().keys()].filter(clientId => clientId !== room.yDoc.clientID)
-      const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
-      socket.emit('awareness:update', awarenessUpdate)
+      if (clients.length) {
+        const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
+        socket.emit('awareness:update', awarenessUpdate)
+      }
     })
     socket.on('yDoc:diff', (roomName, diff) => {
       const room = roomMap.get(roomName)
