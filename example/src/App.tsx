@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Awareness } from 'y-protocols/awareness'
-import { SocketIOProvider } from 'y-socket.io'
+import { createSocketIOProvider } from 'y-socket.io'
 import * as Y from 'yjs'
 
 const yDoc = new Y.Doc()
@@ -41,7 +41,7 @@ export const App: React.FC = () => {
       )
     }
     awareness.on('update', handleAwarenessUpdate)
-    const provider = new SocketIOProvider(
+    const provider = createSocketIOProvider(
       'ws://localhost:1234',
       'test',
       yDoc,
