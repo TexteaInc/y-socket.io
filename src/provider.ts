@@ -85,9 +85,7 @@ export const createSocketIOProvider = (
   })
   socket.on('yDoc:update', (update) => {
     Y.applyUpdateV2(yDoc, new Uint8Array(update), socket)
-    store.setState({
-      synced: true
-    })
+    store.setState({ synced: true })
   })
   socket.on('awareness:update', (update) => {
     applyAwarenessUpdate(awareness, new Uint8Array(update), socket)
@@ -108,7 +106,10 @@ export const createSocketIOProvider = (
   const handleYDocUpdate = (update: Uint8Array, origin: null | Socket) => {
     if (origin !== socket) {
       const updateV2 = Y.convertUpdateFormatV1ToV2(update)
-      socket.emit('yDoc:update', roomName, updateV2)
+      socket.emit('yDoc:update', roomName, updateV2, () => {
+        store.setState({ synced: true })
+      })
+      store.setState({ synced: false })
     }
   }
   yDoc.on('update', handleYDocUpdate)

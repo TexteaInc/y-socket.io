@@ -75,12 +75,13 @@ export const createSocketServer = (httpServer: HTTPServer) => {
         socket.emit('yDoc:update', update)
       }
     })
-    socket.on('yDoc:update', (roomName, update) => {
+    socket.on('yDoc:update', (roomName, update, callback) => {
       const room = roomMap.get(roomName)
       if (!room) {
         console.error('room is null')
       } else {
         Y.applyUpdateV2(room.yDoc, update, socket.id)
+        callback?.()
       }
     })
     socket.on('awareness:update', (roomName, update) => {

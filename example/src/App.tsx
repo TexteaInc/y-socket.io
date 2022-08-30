@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useDeferredValue, useEffect, useState } from 'react'
 import { Awareness } from 'y-protocols/awareness'
 import { useSocketIOProviderState } from 'y-socket.io/hooks'
 import { createSocketIOProvider, SocketIOProvider } from 'y-socket.io/provider'
@@ -26,7 +26,18 @@ export const App: React.FC = () => {
   const [others, setOthers] = useState<User[]>([])
 
   const [provider, setProvider] = useState<SocketIOProvider>()
-  const connected = useSocketIOProviderState(provider, (state) => state.connected)
+  const isConnecting = useSocketIOProviderState(provider, (state) => state.connecting)
+  const isConnected = useSocketIOProviderState(provider, (state) => state.connected)
+  const isSynced = useSocketIOProviderState(provider, (state) => state.synced)
+  const deferredIsSynced = useDeferredValue(isSynced)
+
+  const status = isConnecting
+    ? 'Connecting'
+    : isConnected
+      ? deferredIsSynced
+        ? 'Synced'
+        : 'Syncing'
+      : 'Disconnected'
 
   useEffect(() => {
     const yTextObserver = () => {
@@ -62,21 +73,26 @@ export const App: React.FC = () => {
     }
   }, [])
 
+  if (!provider) {
+    return <p>loading...</p>
+  }
+
   return (
     <>
       <p>
         <button
           onClick={() => {
-            if (connected) {
+            if (isConnected) {
               provider?.disconnect()
             } else {
               provider?.connect()
             }
           }}
         >
-          {connected ? 'Disconnect' : 'Connect'}
+          {isConnected ? 'Disconnect' : 'Connect'}
         </button>
       </p>
+      <p>Status: {status}</p>
       <p>
         <label htmlFor='text'>Text: </label>
         <input
@@ -100,14 +116,16 @@ export const App: React.FC = () => {
           }}
         />
       </p>
-      <div>
-        <div>Users: </div>
-        <ul>
-          {others.map((user) => (
-            <li key={user.id}>{user.name}</li>
-          ))}
-        </ul>
-      </div>
+      {isConnected && others.length > 0 && (
+        <div>
+          <div>Users: </div>
+          <ul>
+            {others.map((user) => (
+              <li key={user.id}>{user.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </>
   )
 }
