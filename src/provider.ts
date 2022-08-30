@@ -1,6 +1,8 @@
 import { io, Socket } from 'socket.io-client'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
+import { createStore, Mutate, StoreApi } from 'zustand'
+import { subscribeWithSelector } from 'zustand/middleware'
 
 import type { AwarenessChanges, ClientToServerEvents, ServerToClientEvents } from './types'
 
@@ -9,10 +11,22 @@ export interface Options {
   awareness?: Awareness
 }
 
-export interface SocketIOProvider {
+export interface SocketIOProviderState {
+  connecting: boolean
+  connected: boolean
+  synced: boolean
+  error: string | null
+}
+
+type ReadonlyStore<Store extends StoreApi<unknown>> = Omit<Store, 'setState'>
+
+type SocketIOProviderStore = ReadonlyStore<
+  Mutate<StoreApi<SocketIOProviderState>, [['zustand/subscribeWithSelector', never]]>
+>
+
+export interface SocketIOProvider extends SocketIOProviderStore {
   connect: () => void
   disconnect: () => void
-  destroy: () => void
 }
 
 export const createSocketIOProvider = (
@@ -24,10 +38,25 @@ export const createSocketIOProvider = (
     awareness = new Awareness(yDoc)
   }: Options = {}
 ): SocketIOProvider => {
+  const store = createStore<SocketIOProviderState>()(
+    subscribeWithSelector((_set) => ({
+      connecting: autoConnect,
+      connected: false,
+      synced: false,
+      error: null
+    }))
+  )
+
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
     autoConnect
   })
 
+  socket.on('connect_error', (err) => {
+    store.setState({
+      connecting: false,
+      error: err.message
+    })
+  })
   socket.on('connect', () => {
     socket.emit('join', roomName)
     const yDocDiff = Y.encodeStateVector(yDoc)
@@ -36,6 +65,11 @@ export const createSocketIOProvider = (
       const awarenessUpdate = encodeAwarenessUpdate(awareness, [yDoc.clientID])
       socket.emit('awareness:update', roomName, awarenessUpdate)
     }
+    store.setState({
+      connecting: false,
+      connected: true,
+      error: null
+    })
   })
   socket.on('yDoc:diff', (diff) => {
     const update = Y.encodeStateAsUpdateV2(yDoc, new Uint8Array(diff))
@@ -43,9 +77,24 @@ export const createSocketIOProvider = (
   })
   socket.on('yDoc:update', (update) => {
     Y.applyUpdateV2(yDoc, new Uint8Array(update), socket)
+    store.setState({
+      synced: true
+    })
   })
   socket.on('awareness:update', (update) => {
     applyAwarenessUpdate(awareness, new Uint8Array(update), socket)
+  })
+  socket.on('disconnect', (_reason, description) => {
+    const clients = [...awareness.getStates().keys()].filter(
+      (clientId) => clientId !== yDoc.clientID
+    )
+    removeAwarenessStates(awareness, clients, socket)
+    const err = description instanceof Error ? description.message : null
+    store.setState({
+      connecting: false,
+      connected: false,
+      error: err
+    })
   })
 
   const handleYDocUpdate = (update: Uint8Array, origin: null | Socket) => {
@@ -56,7 +105,7 @@ export const createSocketIOProvider = (
   }
   yDoc.on('update', handleYDocUpdate)
 
-  const handleAwarenessUpdate = (changes: AwarenessChanges, origin: 'local' | Socket) => {
+  const handleAwarenessUpdate = (changes: AwarenessChanges, origin: string | Socket) => {
     if (origin !== socket) {
       const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
       const update = encodeAwarenessUpdate(awareness, changedClients)
@@ -65,23 +114,27 @@ export const createSocketIOProvider = (
   }
   awareness.on('update', handleAwarenessUpdate)
 
-  const handleBeforeUnload = () => {
-    removeAwarenessStates(awareness, [yDoc.clientID], null)
-  }
-  window.addEventListener('beforeunload', handleBeforeUnload)
-
   return {
+    getState: store.getState,
     connect: () => {
-      socket.connect()
+      const { connecting, connected } = store.getState()
+      if (!connecting && !connected) {
+        socket.connect()
+        store.setState({
+          connecting: true,
+          error: null
+        })
+      }
     },
     disconnect: () => {
       socket.disconnect()
     },
+    subscribe: store.subscribe,
     destroy: () => {
+      store.destroy()
       socket.disconnect()
       yDoc.off('update', handleYDocUpdate)
       awareness.off('update', handleAwarenessUpdate)
-      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }
 }
