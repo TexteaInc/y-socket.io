@@ -3,7 +3,12 @@ import { Server } from 'socket.io'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
-import type { AwarenessChanges, ClientToServerEvents, Room, ServerToClientEvents } from '../../types'
+import type { AwarenessChanges, ClientToServerEvents, ServerToClientEvents } from '../../types'
+
+type Room = {
+  yDoc: Y.Doc
+  awareness: Awareness
+}
 
 /**
  * There are four scenarios:
@@ -42,7 +47,7 @@ export const createSocketServer = (httpServer: HTTPServer) => {
         awareness.on('update', (changes: AwarenessChanges, origin: string) => {
           const changedClients = Object.values(changes)
             .reduce((res, cur) => [...res, ...cur])
-            .filter(clientId => clientId !== yDoc.clientID)
+            .filter((clientId) => clientId !== yDoc.clientID)
           if (changedClients.length) {
             const update = encodeAwarenessUpdate(awareness, changedClients)
             io.to(roomName).except(origin).emit('awareness:update', update)
@@ -53,7 +58,9 @@ export const createSocketServer = (httpServer: HTTPServer) => {
       }
       const yDocDiff = Y.encodeStateVector(room.yDoc)
       socket.emit('yDoc:diff', yDocDiff)
-      const clients = [...room.awareness.getStates().keys()].filter(clientId => clientId !== room.yDoc.clientID)
+      const clients = [...room.awareness.getStates().keys()].filter(
+        (clientId) => clientId !== room.yDoc.clientID
+      )
       if (clients.length) {
         const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
         socket.emit('awareness:update', awarenessUpdate)

@@ -1,12 +1,4 @@
-import type { Awareness } from 'y-protocols/awareness'
-import type * as Y from 'yjs'
-
 export type AwarenessChanges = Record<'added' | 'updated' | 'removed', number[]>
-
-export interface Room {
-  yDoc: Y.Doc
-  awareness: Awareness
-}
 
 export interface ServerToClientEvents {
   'yDoc:diff': (diff: ArrayBuffer) => void
