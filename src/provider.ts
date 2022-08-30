@@ -18,6 +18,16 @@ export interface SocketIOProviderState {
   error: string | null
 }
 
+/**
+ * @internal
+ */
+export const INITIAL_STATE: Readonly<SocketIOProviderState> = {
+  connecting: false,
+  connected: false,
+  synced: false,
+  error: null
+}
+
 type ReadonlyStore<Store extends StoreApi<unknown>> = Omit<Store, 'setState'>
 
 type SocketIOProviderStore = ReadonlyStore<
@@ -39,11 +49,9 @@ export const createSocketIOProvider = (
   }: Options = {}
 ): SocketIOProvider => {
   const store = createStore<SocketIOProviderState>()(
-    subscribeWithSelector((_set) => ({
-      connecting: autoConnect,
-      connected: false,
-      synced: false,
-      error: null
+    subscribeWithSelector(() => ({
+      ...INITIAL_STATE,
+      connecting: autoConnect
     }))
   )
 

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Awareness } from 'y-protocols/awareness'
-import { createSocketIOProvider, SocketIOProvider } from 'y-socket.io'
+import { useSocketIOProviderState } from 'y-socket.io/hooks'
+import { createSocketIOProvider, SocketIOProvider } from 'y-socket.io/provider'
 import * as Y from 'yjs'
 
 const yDoc = new Y.Doc()
@@ -24,8 +25,8 @@ export const App: React.FC = () => {
   const [name, setName] = useState(DEFAULT_USER.name)
   const [others, setOthers] = useState<User[]>([])
 
-  const providerRef = useRef<SocketIOProvider | null>(null)
-  const [connected, setConnected] = useState(false)
+  const [provider, setProvider] = useState<SocketIOProvider>()
+  const connected = useSocketIOProviderState(provider, (state) => state.connected)
 
   useEffect(() => {
     const yTextObserver = () => {
@@ -53,8 +54,7 @@ export const App: React.FC = () => {
         awareness
       }
     )
-    provider.subscribe((state) => state.connected, setConnected)
-    providerRef.current = provider
+    setProvider(provider)
     return () => {
       yText.unobserve(yTextObserver)
       awareness.off('update', handleAwarenessUpdate)
@@ -68,9 +68,9 @@ export const App: React.FC = () => {
         <button
           onClick={() => {
             if (connected) {
-              providerRef.current?.disconnect()
+              provider?.disconnect()
             } else {
-              providerRef.current?.connect()
+              provider?.connect()
             }
           }}
         >
