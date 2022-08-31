@@ -4,7 +4,9 @@ import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-s
 import { INITIAL_STATE, SocketIOProvider, SocketIOProviderState } from './provider'
 
 const getInitialState = () => INITIAL_STATE
-const noop = () => {}
+
+const noop = () => noop
+const identity = <T>(value: T) => value
 
 export function useSocketIOProviderState (provider: SocketIOProvider | undefined): SocketIOProviderState
 
@@ -16,16 +18,15 @@ export function useSocketIOProviderState<StateSlice> (
 
 export function useSocketIOProviderState<StateSlice> (
   provider: SocketIOProvider | undefined,
-  selector?: (state: SocketIOProviderState) => StateSlice | SocketIOProviderState,
+  selector: (state: SocketIOProviderState) => StateSlice | SocketIOProviderState = identity,
   equalityFn?: (a: StateSlice | SocketIOProviderState, b: StateSlice | SocketIOProviderState) => boolean
 ) {
-  const { getState = getInitialState, subscribe = () => noop } = provider ?? {}
-  const selectState = selector ?? getState
+  const { getState = getInitialState, subscribe = noop } = provider ?? {}
   const selectedState = useSyncExternalStoreWithSelector(
     subscribe,
     getState,
     getInitialState,
-    selectState,
+    selector,
     equalityFn
   )
   useDebugValue(selectedState)
