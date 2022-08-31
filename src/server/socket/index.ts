@@ -1,5 +1,5 @@
 import type { Server as HTTPServer } from 'http'
-import { Server } from 'socket.io'
+import { Server, Socket } from 'socket.io'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
@@ -39,14 +39,14 @@ export const createSocketServer = (httpServer: HTTPServer) => {
       } else {
         const yDoc = new Y.Doc()
         // todo: bind persistence
-        yDoc.on('update', (update: Uint8Array, origin: string) => {
+        yDoc.on('update', (update: Uint8Array, origin: Socket['id']) => {
           const updateV2 = Y.convertUpdateFormatV1ToV2(update)
           io.to(roomName).except(origin).emit('yDoc:update', updateV2)
         })
         const awareness = new Awareness(yDoc)
         // delete local `clientId` from `awareness.getStates()` Map
         awareness.setLocalState(null)
-        awareness.on('update', (changes: AwarenessChanges, origin: string) => {
+        awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
           const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
           const update = encodeAwarenessUpdate(awareness, changedClients)
           io.to(roomName).except(origin).emit('awareness:update', update)
