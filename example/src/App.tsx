@@ -56,15 +56,10 @@ export const App: React.FC = () => {
       )
     }
     awareness.on('update', handleAwarenessUpdate)
-    const provider = createSocketIOProvider(
-      'ws://localhost:1234',
-      'test',
-      yDoc,
-      {
-        autoConnect: true,
-        awareness
-      }
-    )
+    const provider = createSocketIOProvider('ws://localhost:1234', 'test', yDoc, {
+      awareness,
+      autoConnectBroadcastChannel: true
+    })
     setProvider(provider)
     return () => {
       yText.unobserve(yTextObserver)
@@ -116,7 +111,7 @@ export const App: React.FC = () => {
           }}
         />
       </p>
-      {isConnected && others.length > 0 && (
+      {others.length > 0 && (
         <div>
           <div>Users: </div>
           <ul>
