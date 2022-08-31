@@ -54,18 +54,23 @@ export interface SocketIOProvider extends SocketIOProviderStore {
   disconnectBroadcastChannel: () => void
 }
 
-export const createSocketIOProvider = (
+type CreateSocketIOProvider = (
   serverUrl: string,
   roomName: string,
   yDoc: Y.Doc,
-  options: Options = {}
-): SocketIOProvider => {
-  const {
+  options?: Options
+) => SocketIOProvider
+
+export const createSocketIOProvider: CreateSocketIOProvider = (
+  serverUrl,
+  roomName,
+  yDoc,
+  {
     awareness = new Awareness(yDoc),
     autoConnect = false,
     autoConnectBroadcastChannel = false
-  } = options
-
+  } = {}
+) => {
   const store = createStore<SocketIOProviderState>()(
     subscribeWithSelector(() => ({
       ...INITIAL_STATE,
