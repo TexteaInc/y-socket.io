@@ -44,24 +44,21 @@ export const createSocketServer = (httpServer: HTTPServer) => {
           io.to(roomName).except(origin).emit('yDoc:update', updateV2)
         })
         const awareness = new Awareness(yDoc)
+        // delete local `clientId` from `awareness.getStates()` Map
+        awareness.setLocalState(null)
         awareness.on('update', (changes: AwarenessChanges, origin: string) => {
-          const changedClients = Object.values(changes)
-            .reduce((res, cur) => [...res, ...cur])
-            .filter((clientId) => clientId !== yDoc.clientID)
-          if (changedClients.length) {
-            const update = encodeAwarenessUpdate(awareness, changedClients)
-            io.to(roomName).except(origin).emit('awareness:update', update)
-          }
+          const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
+          const update = encodeAwarenessUpdate(awareness, changedClients)
+          io.to(roomName).except(origin).emit('awareness:update', update)
         })
         room = { yDoc, awareness }
         roomMap.set(roomName, room)
       }
       const yDocDiff = Y.encodeStateVector(room.yDoc)
       socket.emit('yDoc:diff', yDocDiff)
-      const clients = [...room.awareness.getStates().keys()].filter(
-        (clientId) => clientId !== room.yDoc.clientID
-      )
-      if (clients.length) {
+      const awarenessStates = room.awareness.getStates()
+      if (awarenessStates.size) {
+        const clients = [...awarenessStates.keys()]
         const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
         socket.emit('awareness:update', awarenessUpdate)
       }
