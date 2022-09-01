@@ -58,7 +58,7 @@ export const App: React.FC = () => {
     awareness.on('update', handleAwarenessUpdate)
     const provider = createSocketIOProvider('ws://localhost:1234', 'test', yDoc, {
       awareness,
-      autoConnectBroadcastChannel: true
+      autoConnect: false
     })
     setProvider(provider)
     return () => {

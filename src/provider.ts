@@ -15,11 +15,11 @@ import type {
 export interface Options {
   awareness?: Awareness
   /**
-   * @default false
+   * @default true
    */
   autoConnect?: boolean
   /**
-   * @default false
+   * @default true
    */
   autoConnectBroadcastChannel?: boolean
 }
@@ -67,8 +67,8 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   doc,
   {
     awareness = new Awareness(doc),
-    autoConnect = false,
-    autoConnectBroadcastChannel = false
+    autoConnect = true,
+    autoConnectBroadcastChannel = true
   } = {}
 ) => {
   const store = createStore<SocketIOProviderState>()(
