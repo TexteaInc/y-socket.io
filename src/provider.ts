@@ -57,16 +57,16 @@ export interface SocketIOProvider extends SocketIOProviderStore {
 type CreateSocketIOProvider = (
   serverUrl: string,
   roomName: string,
-  yDoc: Y.Doc,
+  doc: Y.Doc,
   options?: Options
 ) => SocketIOProvider
 
 export const createSocketIOProvider: CreateSocketIOProvider = (
   serverUrl,
   roomName,
-  yDoc,
+  doc,
   {
-    awareness = new Awareness(yDoc),
+    awareness = new Awareness(doc),
     autoConnect = false,
     autoConnectBroadcastChannel = false
   } = {}
@@ -90,10 +90,10 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   })
   socket.on('connect', () => {
     socket.emit('join', roomName)
-    const yDocDiff = Y.encodeStateVector(yDoc)
-    socket.emit('yDoc:diff', roomName, yDocDiff)
+    const docDiff = Y.encodeStateVector(doc)
+    socket.emit('doc:diff', roomName, docDiff)
     if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [yDoc.clientID])
+      const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
       socket.emit('awareness:update', roomName, awarenessUpdate)
     }
     store.setState({
@@ -102,12 +102,12 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       error: null
     })
   })
-  socket.on('yDoc:diff', (diff) => {
-    const updateV2 = Y.encodeStateAsUpdateV2(yDoc, new Uint8Array(diff))
-    socket.emit('yDoc:update', roomName, updateV2)
+  socket.on('doc:diff', (diff) => {
+    const updateV2 = Y.encodeStateAsUpdateV2(doc, new Uint8Array(diff))
+    socket.emit('doc:update', roomName, updateV2)
   })
-  socket.on('yDoc:update', (update) => {
-    Y.applyUpdateV2(yDoc, new Uint8Array(update), socket)
+  socket.on('doc:update', (update) => {
+    Y.applyUpdateV2(doc, new Uint8Array(update), socket)
     store.setState({ synced: true })
   })
   socket.on('awareness:update', (update) => {
@@ -115,7 +115,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   })
   socket.on('disconnect', (_reason, description) => {
     const clients = [...awareness.getStates().keys()].filter(
-      (clientId) => clientId !== yDoc.clientID
+      (clientId) => clientId !== doc.clientID
     )
     removeAwarenessStates(awareness, clients, socket)
     const err = description instanceof Error ? description.message : null
@@ -131,29 +131,29 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   const handleBroadcastChannelMessage = (event: BroadcastChannelMessageEvent) => {
     const [eventName] = event.data
     switch (eventName) {
-      case 'yDoc:diff': {
+      case 'doc:diff': {
         const [, diff, clientId] = event.data
-        const updateV2 = Y.encodeStateAsUpdateV2(yDoc, diff)
-        broadcastChannel.postMessage(['yDoc:update', updateV2, clientId])
+        const updateV2 = Y.encodeStateAsUpdateV2(doc, diff)
+        broadcastChannel.postMessage(['doc:update', updateV2, clientId])
         break
       }
-      case 'yDoc:update': {
+      case 'doc:update': {
         const [, update, clientId] = event.data
-        if (!clientId || clientId === yDoc.clientID) {
-          Y.applyUpdateV2(yDoc, update, socket)
+        if (!clientId || clientId === doc.clientID) {
+          Y.applyUpdateV2(doc, update, socket)
         }
         break
       }
       case 'awareness:query': {
         const [, clientId] = event.data
         const clients = [...awareness.getStates().keys()]
-        const awarenessUpdate = encodeAwarenessUpdate(awareness, clients)
-        broadcastChannel.postMessage(['awareness:update', awarenessUpdate, clientId])
+        const update = encodeAwarenessUpdate(awareness, clients)
+        broadcastChannel.postMessage(['awareness:update', update, clientId])
         break
       }
       case 'awareness:update': {
         const [, update, clientId] = event.data
-        if (!clientId || clientId === yDoc.clientID) {
+        if (!clientId || clientId === doc.clientID) {
           applyAwarenessUpdate(awareness, update, socket)
         }
         break
@@ -165,13 +165,13 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       return
     }
     broadcastChannel.onmessage = handleBroadcastChannelMessage
-    const yDocDiff = Y.encodeStateVector(yDoc)
-    broadcastChannel.postMessage(['yDoc:diff', yDocDiff, yDoc.clientID])
-    const yDocUpdate = Y.encodeStateAsUpdateV2(yDoc)
-    broadcastChannel.postMessage(['yDoc:update', yDocUpdate])
-    broadcastChannel.postMessage(['awareness:query', yDoc.clientID])
+    const docDiff = Y.encodeStateVector(doc)
+    broadcastChannel.postMessage(['doc:diff', docDiff, doc.clientID])
+    const docUpdate = Y.encodeStateAsUpdateV2(doc)
+    broadcastChannel.postMessage(['doc:update', docUpdate])
+    broadcastChannel.postMessage(['awareness:query', doc.clientID])
     if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [yDoc.clientID])
+      const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
       broadcastChannel.postMessage(['awareness:update', awarenessUpdate])
     }
   }
@@ -182,17 +182,17 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     connectBroadcastChannel()
   }
 
-  const handleYDocUpdate = (update: Uint8Array, origin: null | Socket) => {
+  const handleDocUpdate = (update: Uint8Array, origin: null | Socket) => {
     if (origin !== socket) {
       const updateV2 = Y.convertUpdateFormatV1ToV2(update)
-      socket.emit('yDoc:update', roomName, updateV2, () => {
+      socket.emit('doc:update', roomName, updateV2, () => {
         store.setState({ synced: true })
       })
       store.setState({ synced: false })
-      broadcastChannel.postMessage(['yDoc:update', updateV2])
+      broadcastChannel.postMessage(['doc:update', updateV2])
     }
   }
-  yDoc.on('update', handleYDocUpdate)
+  doc.on('update', handleDocUpdate)
 
   const handleAwarenessUpdate = (changes: AwarenessChanges, origin: string | Socket) => {
     if (origin !== socket) {
@@ -226,7 +226,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       store.destroy()
       socket.disconnect()
       broadcastChannel.close()
-      yDoc.off('update', handleYDocUpdate)
+      doc.off('update', handleDocUpdate)
       awareness.off('update', handleAwarenessUpdate)
     }
   }

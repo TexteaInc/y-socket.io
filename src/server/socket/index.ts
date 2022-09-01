@@ -6,7 +6,7 @@ import * as Y from 'yjs'
 import type { AwarenessChanges, ClientToServerEvents, ServerToClientEvents } from '../../types'
 
 type Room = {
-  yDoc: Y.Doc
+  doc: Y.Doc
   awareness: Awareness
 }
 
@@ -37,13 +37,13 @@ export const createSocketServer = (httpServer: HTTPServer) => {
       if (roomMap.has(roomName)) {
         room = roomMap.get(roomName)!
       } else {
-        const yDoc = new Y.Doc()
+        const doc = new Y.Doc()
         // todo: bind persistence
-        yDoc.on('update', (update: Uint8Array, origin: Socket['id']) => {
+        doc.on('update', (update: Uint8Array, origin: Socket['id']) => {
           const updateV2 = Y.convertUpdateFormatV1ToV2(update)
-          io.to(roomName).except(origin).emit('yDoc:update', updateV2)
+          io.to(roomName).except(origin).emit('doc:update', updateV2)
         })
-        const awareness = new Awareness(yDoc)
+        const awareness = new Awareness(doc)
         // delete local `clientId` from `awareness.getStates()` Map
         awareness.setLocalState(null)
         awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
@@ -51,11 +51,11 @@ export const createSocketServer = (httpServer: HTTPServer) => {
           const update = encodeAwarenessUpdate(awareness, changedClients)
           io.to(roomName).except(origin).emit('awareness:update', update)
         })
-        room = { yDoc, awareness }
+        room = { doc, awareness }
         roomMap.set(roomName, room)
       }
-      const yDocDiff = Y.encodeStateVector(room.yDoc)
-      socket.emit('yDoc:diff', yDocDiff)
+      const docDiff = Y.encodeStateVector(room.doc)
+      socket.emit('doc:diff', docDiff)
       const awarenessStates = room.awareness.getStates()
       if (awarenessStates.size) {
         const clients = [...awarenessStates.keys()]
@@ -63,21 +63,21 @@ export const createSocketServer = (httpServer: HTTPServer) => {
         socket.emit('awareness:update', awarenessUpdate)
       }
     })
-    socket.on('yDoc:diff', (roomName, diff) => {
+    socket.on('doc:diff', (roomName, diff) => {
       const room = roomMap.get(roomName)
       if (!room) {
         console.error('room is null')
       } else {
-        const update = Y.encodeStateAsUpdateV2(room.yDoc, diff)
-        socket.emit('yDoc:update', update)
+        const update = Y.encodeStateAsUpdateV2(room.doc, diff)
+        socket.emit('doc:update', update)
       }
     })
-    socket.on('yDoc:update', (roomName, update, callback) => {
+    socket.on('doc:update', (roomName, update, callback) => {
       const room = roomMap.get(roomName)
       if (!room) {
         console.error('room is null')
       } else {
-        Y.applyUpdateV2(room.yDoc, update, socket.id)
+        Y.applyUpdateV2(room.doc, update, socket.id)
         callback?.()
       }
     })
