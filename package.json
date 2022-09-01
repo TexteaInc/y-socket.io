@@ -2,10 +2,14 @@
   "name": "y-socket.io",
   "version": "0.0.2",
   "private": true,
-  "bin": {
-    "start": "./bin/run.ts"
-  },
+  "workspaces": [
+    ".",
+    "example"
+  ],
   "scripts": {
+    "start": "./bin/run.ts",
+    "start:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch src/server ./bin/run.ts",
+    "example": "yarn workspace y-socket.io-example dev",
     "test": "run -T vitest",
     "test:ui": "run -T vitest --ui",
     "test:run": "run -T vitest run"
@@ -13,23 +17,37 @@
   "dependencies": {
     "@clerk/backend-core": "^2.1.1",
     "@clerk/clerk-sdk-node": "^4.1.1",
-    "@types/express": "^4.17.13",
     "cookie": "^0.5.0",
     "express": "^4.18.1",
-    "lib0": "^0.2.52",
-    "lodash": "^4.17.21",
     "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
+    "use-sync-external-store": "^1.2.0",
     "y-protocols": "^1.0.5",
+    "zustand": "^4.1.1"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "yjs": "^13.5.41"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-angular": "^17.0.3",
+    "@swc/core": "^1.2.242",
+    "@textea/dev-kit": "^0.11.10",
     "@types/cookie": "^0.5.1",
-    "@types/ws": "^8.5.3",
+    "@types/express": "^4.17.13",
+    "@types/node": "^18.7.13",
+    "@types/use-sync-external-store": "^0.0.3",
+    "@types/web": "^0.0.72",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "@vitest/ui": "^0.22.1",
+    "cross-env": "^7.0.3",
     "eslint": "^8.22.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-cypress": "^2.12.1",
@@ -42,11 +60,13 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
+    "nodemon": "^2.0.19",
     "prettier": "^2.7.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4",
     "vite": "^3.0.9",
-    "vitest": "^0.22.1"
+    "vitest": "^0.22.1",
+    "yjs": "^13.5.41"
   },
   "packageManager": "yarn@3.2.2"
 }
