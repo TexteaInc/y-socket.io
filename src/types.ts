@@ -1,6 +1,6 @@
 export type AwarenessChanges = Record<'added' | 'updated' | 'removed', number[]>
 
-type EventNameWithScope<Scope extends string, Action extends string = string> = `${Scope}:${Action}`
+type EventNameWithScope<Scope extends string, Type extends string = string> = `${Scope}:${Type}`
 
 type YDocScope = 'doc'
 type AwarenessScope = 'awareness'
