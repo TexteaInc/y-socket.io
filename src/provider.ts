@@ -106,8 +106,8 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     const updateV2 = Y.encodeStateAsUpdateV2(doc, new Uint8Array(diff))
     socket.emit('doc:update', roomName, updateV2)
   })
-  socket.on('doc:update', (update) => {
-    Y.applyUpdateV2(doc, new Uint8Array(update), socket)
+  socket.on('doc:update', (updateV2) => {
+    Y.applyUpdateV2(doc, new Uint8Array(updateV2), socket)
     store.setState({ synced: true })
   })
   socket.on('awareness:update', (update) => {
@@ -138,9 +138,9 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
         break
       }
       case 'doc:update': {
-        const [, update, clientId] = event.data
+        const [, updateV2, clientId] = event.data
         if (!clientId || clientId === doc.clientID) {
-          Y.applyUpdateV2(doc, update, socket)
+          Y.applyUpdateV2(doc, updateV2, socket)
         }
         break
       }
@@ -167,8 +167,8 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     broadcastChannel.onmessage = handleBroadcastChannelMessage
     const docDiff = Y.encodeStateVector(doc)
     broadcastChannel.postMessage(['doc:diff', docDiff, doc.clientID])
-    const docUpdate = Y.encodeStateAsUpdateV2(doc)
-    broadcastChannel.postMessage(['doc:update', docUpdate])
+    const docUpdateV2 = Y.encodeStateAsUpdateV2(doc)
+    broadcastChannel.postMessage(['doc:update', docUpdateV2])
     broadcastChannel.postMessage(['awareness:query', doc.clientID])
     if (awareness.getLocalState() !== null) {
       const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
@@ -182,9 +182,9 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     connectBroadcastChannel()
   }
 
-  const handleDocUpdate = (update: Uint8Array, origin: null | Socket) => {
+  const handleDocUpdate = (updateV1: Uint8Array, origin: null | Socket) => {
     if (origin !== socket) {
-      const updateV2 = Y.convertUpdateFormatV1ToV2(update)
+      const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
       socket.emit('doc:update', roomName, updateV2, () => {
         store.setState({ synced: true })
       })

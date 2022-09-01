@@ -39,8 +39,8 @@ export const createSocketServer = (httpServer: HTTPServer) => {
       } else {
         const doc = new Y.Doc()
         // todo: bind persistence
-        doc.on('update', (update: Uint8Array, origin: Socket['id']) => {
-          const updateV2 = Y.convertUpdateFormatV1ToV2(update)
+        doc.on('update', (updateV1: Uint8Array, origin: Socket['id']) => {
+          const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
           io.to(roomName).except(origin).emit('doc:update', updateV2)
         })
         const awareness = new Awareness(doc)
@@ -68,16 +68,16 @@ export const createSocketServer = (httpServer: HTTPServer) => {
       if (!room) {
         console.error('room is null')
       } else {
-        const update = Y.encodeStateAsUpdateV2(room.doc, diff)
-        socket.emit('doc:update', update)
+        const updateV2 = Y.encodeStateAsUpdateV2(room.doc, diff)
+        socket.emit('doc:update', updateV2)
       }
     })
-    socket.on('doc:update', (roomName, update, callback) => {
+    socket.on('doc:update', (roomName, updateV2, callback) => {
       const room = roomMap.get(roomName)
       if (!room) {
         console.error('room is null')
       } else {
-        Y.applyUpdateV2(room.doc, update, socket.id)
+        Y.applyUpdateV2(room.doc, updateV2, socket.id)
         callback?.()
       }
     })
