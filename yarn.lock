@@ -1200,6 +1200,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/uuid@npm:^8.3.4":
+  version: 8.3.4
+  resolution: "@types/uuid@npm:8.3.4"
+  checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
+  languageName: node
+  linkType: hard
+
 "@types/web@npm:^0.0.72":
   version: 0.0.72
   resolution: "@types/web@npm:0.0.72"
@@ -6656,6 +6663,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uuid@npm:^8.3.2":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
+  languageName: node
+  linkType: hard
+
 "v8-compile-cache-lib@npm:^3.0.1":
   version: 3.0.1
   resolution: "v8-compile-cache-lib@npm:3.0.1"
@@ -6916,6 +6932,7 @@ __metadata:
     "@types/express": ^4.17.13
     "@types/node": ^18.7.13
     "@types/use-sync-external-store": ^0.0.3
+    "@types/uuid": ^8.3.4
     "@types/web": ^0.0.72
     "@typescript-eslint/eslint-plugin": ^5.33.0
     "@typescript-eslint/parser": ^5.33.0
@@ -6942,6 +6959,7 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ^4.7.4
     use-sync-external-store: ^1.2.0
+    uuid: ^8.3.2
     vite: ^3.0.9
     vitest: ^0.22.1
     y-protocols: ^1.0.5

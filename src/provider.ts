@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client'
+import { v4 as uuid } from 'uuid'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 import { createStore, Mutate, StoreApi } from 'zustand'
@@ -71,6 +72,9 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     autoConnectBroadcastChannel = true
   } = {}
 ) => {
+  type DocUpdateId = string
+  const syncingDocUpdates = new Set<DocUpdateId>()
+
   const store = createStore<SocketIOProviderState>()(
     subscribeWithSelector(() => ({
       ...INITIAL_STATE,
@@ -92,6 +96,11 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     socket.emit('join', roomName)
     const docDiff = Y.encodeStateVector(doc)
     socket.emit('doc:diff', roomName, docDiff)
+    socket.once('doc:update', () => {
+      if (!syncingDocUpdates.size) {
+        store.setState({ synced: true })
+      }
+    })
     if (awareness.getLocalState() !== null) {
       const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
       socket.emit('awareness:update', roomName, awarenessUpdate)
@@ -108,20 +117,19 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   })
   socket.on('doc:update', (updateV2) => {
     Y.applyUpdateV2(doc, new Uint8Array(updateV2), socket)
-    store.setState({ synced: true })
   })
   socket.on('awareness:update', (update) => {
     applyAwarenessUpdate(awareness, new Uint8Array(update), socket)
   })
   socket.on('disconnect', (_reason, description) => {
+    syncingDocUpdates.clear()
     const clients = [...awareness.getStates().keys()].filter(
       (clientId) => clientId !== doc.clientID
     )
     removeAwarenessStates(awareness, clients, socket)
     const err = description instanceof Error ? description.message : null
     store.setState({
-      connecting: false,
-      connected: false,
+      ...INITIAL_STATE,
       error: err
     })
   })
@@ -185,10 +193,17 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   const handleDocUpdate = (updateV1: Uint8Array, origin: null | Socket) => {
     if (origin !== socket) {
       const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
-      socket.emit('doc:update', roomName, updateV2, () => {
-        store.setState({ synced: true })
-      })
-      store.setState({ synced: false })
+      if (socket.connected) {
+        const updateId = uuid()
+        syncingDocUpdates.add(updateId)
+        store.setState({ synced: false })
+        socket.emit('doc:update', roomName, updateV2, () => {
+          syncingDocUpdates.delete(updateId)
+          if (!syncingDocUpdates.size) {
+            store.setState({ synced: true })
+          }
+        })
+      }
       broadcastChannel.postMessage(['doc:update', updateV2])
     }
   }
@@ -198,7 +213,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     if (origin !== socket) {
       const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
       const update = encodeAwarenessUpdate(awareness, changedClients)
-      socket.emit('awareness:update', roomName, update)
+      socket.volatile.emit('awareness:update', roomName, update)
       broadcastChannel.postMessage(['awareness:update', update])
     }
   }
