@@ -5940,7 +5940,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"socket.io-adapter@npm:~2.4.0":
+"socket.io-adapter@npm:^2.4.0, socket.io-adapter@npm:~2.4.0":
   version: 2.4.0
   resolution: "socket.io-adapter@npm:2.4.0"
   checksum: a84639946dce13547b95f6e09fe167cdcd5d80941afc2e46790cc23384e0fd3c901e690ecc9bdd600939ce6292261ee15094a0b486f797ed621cfc8783d87a0c
@@ -6955,6 +6955,7 @@ __metadata:
     nodemon: ^2.0.19
     prettier: ^2.7.1
     socket.io: ^4.5.1
+    socket.io-adapter: ^2.4.0
     socket.io-client: ^4.5.1
     ts-node: ^10.9.1
     typescript: ^4.7.4
