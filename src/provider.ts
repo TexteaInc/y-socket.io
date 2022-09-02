@@ -6,12 +6,12 @@ import { createStore, Mutate, StoreApi } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import type {
-  AwarenessChanges,
+  BroadcastChannelMessageData,
   BroadcastChannelMessageEvent,
   ClientToServerEvents,
-  ServerToClientEvents,
-  TypedBroadcastChannel
-} from './types'
+  ServerToClientEvents
+} from './events'
+import type { AwarenessChanges } from './types'
 
 export interface Options {
   awareness?: Awareness
@@ -133,6 +133,11 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       error: err
     })
   })
+
+  interface TypedBroadcastChannel extends BroadcastChannel {
+    onmessage: ((event: BroadcastChannelMessageEvent) => void) | null
+    postMessage: (message: BroadcastChannelMessageData) => void
+  }
 
   let broadcastChannel: TypedBroadcastChannel | undefined
   const broadcastChannelName = new URL(roomName, serverUrl).toString()

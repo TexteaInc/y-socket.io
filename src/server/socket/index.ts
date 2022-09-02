@@ -3,8 +3,9 @@ import { Server, Socket } from 'socket.io'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
+import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { AwarenessChanges, ClientToServerEvents, ServerToClientEvents } from '../../types'
+import type { AwarenessChanges } from '../../types'
 import { createRoomMap, Room } from './room'
 
 /**
