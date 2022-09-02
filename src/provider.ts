@@ -134,15 +134,15 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     })
   })
 
+  let broadcastChannel: TypedBroadcastChannel | undefined
   const broadcastChannelName = new URL(roomName, serverUrl).toString()
-  const broadcastChannel: TypedBroadcastChannel = new BroadcastChannel(broadcastChannelName)
   const handleBroadcastChannelMessage = (event: BroadcastChannelMessageEvent) => {
     const [eventName] = event.data
     switch (eventName) {
       case 'doc:diff': {
         const [, diff, clientId] = event.data
         const updateV2 = Y.encodeStateAsUpdateV2(doc, diff)
-        broadcastChannel.postMessage(['doc:update', updateV2, clientId])
+        broadcastChannel!.postMessage(['doc:update', updateV2, clientId])
         break
       }
       case 'doc:update': {
@@ -156,7 +156,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
         const [, clientId] = event.data
         const clients = [...awareness.getStates().keys()]
         const update = encodeAwarenessUpdate(awareness, clients)
-        broadcastChannel.postMessage(['awareness:update', update, clientId])
+        broadcastChannel!.postMessage(['awareness:update', update, clientId])
         break
       }
       case 'awareness:update': {
@@ -169,9 +169,10 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     }
   }
   const connectBroadcastChannel = () => {
-    if (broadcastChannel.onmessage !== null) {
+    if (broadcastChannel) {
       return
     }
+    broadcastChannel = new BroadcastChannel(broadcastChannelName)
     broadcastChannel.onmessage = handleBroadcastChannelMessage
     const docDiff = Y.encodeStateVector(doc)
     broadcastChannel.postMessage(['doc:diff', docDiff, doc.clientID])
@@ -184,7 +185,10 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     }
   }
   const disconnectBroadcastChannel = () => {
-    broadcastChannel.onmessage = null
+    if (broadcastChannel) {
+      broadcastChannel.close()
+      broadcastChannel = undefined
+    }
   }
   if (autoConnectBroadcastChannel) {
     connectBroadcastChannel()
@@ -204,7 +208,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
           }
         })
       }
-      broadcastChannel.postMessage(['doc:update', updateV2])
+      broadcastChannel?.postMessage(['doc:update', updateV2])
     }
   }
   doc.on('update', handleDocUpdate)
@@ -214,7 +218,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
       const update = encodeAwarenessUpdate(awareness, changedClients)
       socket.volatile.emit('awareness:update', roomName, update)
-      broadcastChannel.postMessage(['awareness:update', update])
+      broadcastChannel?.postMessage(['awareness:update', update])
     }
   }
   awareness.on('update', handleAwarenessUpdate)
@@ -240,7 +244,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     destroy: () => {
       store.destroy()
       socket.disconnect()
-      broadcastChannel.close()
+      broadcastChannel?.close()
       doc.off('update', handleDocUpdate)
       awareness.off('update', handleAwarenessUpdate)
     }
