@@ -8,16 +8,16 @@ const getInitialState = () => INITIAL_STATE
 const noop = () => noop
 const identity = <T>(value: T) => value
 
-export function useSocketIOProviderState (provider: SocketIOProvider | undefined): SocketIOProviderState
+export function useSocketIOProviderState (provider: SocketIOProvider | null | undefined): SocketIOProviderState
 
 export function useSocketIOProviderState<StateSlice> (
-  provider: SocketIOProvider | undefined,
+  provider: SocketIOProvider | null | undefined,
   selector: (state: SocketIOProviderState) => StateSlice,
   equalityFn?: (a: StateSlice, b: StateSlice) => boolean
 ): StateSlice
 
 export function useSocketIOProviderState<StateSlice> (
-  provider: SocketIOProvider | undefined,
+  provider: SocketIOProvider | null | undefined,
   selector: (state: SocketIOProviderState) => StateSlice | SocketIOProviderState = identity,
   equalityFn?: (a: StateSlice | SocketIOProviderState, b: StateSlice | SocketIOProviderState) => boolean
 ) {

@@ -91,5 +91,14 @@ export const createSocketServer = (httpServer: HTTPServer) => {
     })
   })
 
+  io.sockets.adapter.on('delete-room', (roomName: string) => {
+    if (roomMap.has(roomName)) {
+      const room = roomMap.get(roomName)!
+      room.doc.destroy()
+      room.awareness.destroy()
+      roomMap.delete(roomName)
+    }
+  })
+
   return io
 }
