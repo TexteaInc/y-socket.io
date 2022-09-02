@@ -194,32 +194,36 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     connectBroadcastChannel()
   }
 
+  const shouldSyncUpdate = () => socket.connected || broadcastChannel
+
   const handleDocUpdate = (updateV1: Uint8Array, origin: null | Socket) => {
-    if (origin !== socket) {
-      const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
-      if (socket.connected) {
-        const updateId = uuid()
-        syncingDocUpdates.add(updateId)
-        store.setState({ synced: false })
-        socket.emit('doc:update', roomName, updateV2, () => {
-          syncingDocUpdates.delete(updateId)
-          if (!syncingDocUpdates.size) {
-            store.setState({ synced: true })
-          }
-        })
-      }
-      broadcastChannel?.postMessage(['doc:update', updateV2])
+    if (origin === socket || !shouldSyncUpdate()) {
+      return
     }
+    const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
+    if (socket.connected) {
+      const updateId = uuid()
+      syncingDocUpdates.add(updateId)
+      store.setState({ synced: false })
+      socket.emit('doc:update', roomName, updateV2, () => {
+        syncingDocUpdates.delete(updateId)
+        if (!syncingDocUpdates.size) {
+          store.setState({ synced: true })
+        }
+      })
+    }
+    broadcastChannel?.postMessage(['doc:update', updateV2])
   }
   doc.on('update', handleDocUpdate)
 
   const handleAwarenessUpdate = (changes: AwarenessChanges, origin: string | Socket) => {
-    if (origin !== socket) {
-      const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
-      const update = encodeAwarenessUpdate(awareness, changedClients)
-      socket.volatile.emit('awareness:update', roomName, update)
-      broadcastChannel?.postMessage(['awareness:update', update])
+    if (origin === socket || !shouldSyncUpdate()) {
+      return
     }
+    const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
+    const update = encodeAwarenessUpdate(awareness, changedClients)
+    socket.volatile.emit('awareness:update', roomName, update)
+    broadcastChannel?.postMessage(['awareness:update', update])
   }
   awareness.on('update', handleAwarenessUpdate)
 
