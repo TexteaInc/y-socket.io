@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "start": "./bin/run.ts",
     "start:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch src/server ./bin/run.ts",
     "example": "yarn workspace y-socket.io-example dev",
