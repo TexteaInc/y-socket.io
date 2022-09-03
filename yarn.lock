@@ -878,6 +878,61 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@textea/y-socket.io@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@textea/y-socket.io@workspace:."
+  dependencies:
+    "@commitlint/cli": ^17.0.3
+    "@commitlint/config-angular": ^17.0.3
+    "@swc/core": ^1.2.242
+    "@textea/dev-kit": ^0.11.10
+    "@types/cookie": ^0.5.1
+    "@types/express": ^4.17.13
+    "@types/node": ^18.7.13
+    "@types/use-sync-external-store": ^0.0.3
+    "@types/uuid": ^8.3.4
+    "@types/web": ^0.0.72
+    "@typescript-eslint/eslint-plugin": ^5.33.0
+    "@typescript-eslint/parser": ^5.33.0
+    "@vitest/ui": ^0.22.1
+    cookie: ^0.5.0
+    cross-env: ^7.0.3
+    eslint: ^8.22.0
+    eslint-config-standard: ^17.0.0
+    eslint-plugin-cypress: ^2.12.1
+    eslint-plugin-import: ^2.26.0
+    eslint-plugin-n: ^15.2.4
+    eslint-plugin-promise: ^6.0.0
+    eslint-plugin-react: ^7.30.1
+    eslint-plugin-react-hooks: ^4.6.0
+    eslint-plugin-simple-import-sort: ^7.0.0
+    eslint-plugin-unused-imports: ^2.0.0
+    express: ^4.18.1
+    husky: ^8.0.1
+    lint-staged: ^13.0.3
+    nodemon: ^2.0.19
+    prettier: ^2.7.1
+    socket.io: ^4.5.1
+    socket.io-adapter: ^2.4.0
+    socket.io-client: ^4.5.1
+    ts-node: ^10.9.1
+    typescript: ^4.7.4
+    use-sync-external-store: ^1.2.0
+    uuid: ^8.3.2
+    vite: ^3.0.9
+    vitest: ^0.22.1
+    y-protocols: ^1.0.5
+    yjs: ^13.5.41
+    zustand: ^4.1.1
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    yjs: ^13.5.41
+  peerDependenciesMeta:
+    react:
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -6417,61 +6472,6 @@ __metadata:
     vite: ^3.0.7
     y-protocols: ^1.0.5
     yjs: ^13.5.41
-  languageName: unknown
-  linkType: soft
-
-"y-socket.io@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "y-socket.io@workspace:."
-  dependencies:
-    "@commitlint/cli": ^17.0.3
-    "@commitlint/config-angular": ^17.0.3
-    "@swc/core": ^1.2.242
-    "@textea/dev-kit": ^0.11.10
-    "@types/cookie": ^0.5.1
-    "@types/express": ^4.17.13
-    "@types/node": ^18.7.13
-    "@types/use-sync-external-store": ^0.0.3
-    "@types/uuid": ^8.3.4
-    "@types/web": ^0.0.72
-    "@typescript-eslint/eslint-plugin": ^5.33.0
-    "@typescript-eslint/parser": ^5.33.0
-    "@vitest/ui": ^0.22.1
-    cookie: ^0.5.0
-    cross-env: ^7.0.3
-    eslint: ^8.22.0
-    eslint-config-standard: ^17.0.0
-    eslint-plugin-cypress: ^2.12.1
-    eslint-plugin-import: ^2.26.0
-    eslint-plugin-n: ^15.2.4
-    eslint-plugin-promise: ^6.0.0
-    eslint-plugin-react: ^7.30.1
-    eslint-plugin-react-hooks: ^4.6.0
-    eslint-plugin-simple-import-sort: ^7.0.0
-    eslint-plugin-unused-imports: ^2.0.0
-    express: ^4.18.1
-    husky: ^8.0.1
-    lint-staged: ^13.0.3
-    nodemon: ^2.0.19
-    prettier: ^2.7.1
-    socket.io: ^4.5.1
-    socket.io-adapter: ^2.4.0
-    socket.io-client: ^4.5.1
-    ts-node: ^10.9.1
-    typescript: ^4.7.4
-    use-sync-external-store: ^1.2.0
-    uuid: ^8.3.2
-    vite: ^3.0.9
-    vitest: ^0.22.1
-    y-protocols: ^1.0.5
-    yjs: ^13.5.41
-    zustand: ^4.1.1
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    yjs: ^13.5.41
-  peerDependenciesMeta:
-    react:
-      optional: true
   languageName: unknown
   linkType: soft
 
