@@ -1,10 +1,7 @@
 import type { AddressInfo } from 'net'
-import * as nodeAssert from 'node:assert'
 import { beforeEach, describe, test } from 'vitest'
 
-import { createYDocServer } from '../src'
-
-nodeAssert.ok(process.env.CLERK_API_KEY)
+import { createYDocServer } from '../src/server'
 
 let port: number = null!
 
