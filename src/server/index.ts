@@ -9,7 +9,7 @@ export const createYDocServer = (persistence?: Persistence) => {
     response.end('"okay"')
   })
 
-  const socketServer = createSocketServer(server, persistence)
+  createSocketServer(server, persistence)
 
   return server
 }

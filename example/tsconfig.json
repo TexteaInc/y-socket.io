@@ -7,7 +7,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "paths": {
-      "y-socket.io/*": ["../src/*"]
+      "@textea/y-socket.io/*": ["../src/*"]
     },
     "resolveJsonModule": true,
     // Emit

@@ -1,11 +1,12 @@
+import { useSocketIOProviderState } from '@textea/y-socket.io/hooks'
+import { createSocketIOProvider, SocketIOProvider } from '@textea/y-socket.io/provider'
 import React, { useDeferredValue, useEffect, useState } from 'react'
 import { Awareness } from 'y-protocols/awareness'
-import { useSocketIOProviderState } from 'y-socket.io/hooks'
-import { createSocketIOProvider, SocketIOProvider } from 'y-socket.io/provider'
 import * as Y from 'yjs'
 
 const yDoc = new Y.Doc()
 const yText = yDoc.getText()
+const roomId = 'test-id'
 
 type User = {
   id: number
@@ -56,7 +57,7 @@ export const App: React.FC = () => {
       )
     }
     awareness.on('update', handleAwarenessUpdate)
-    const provider = createSocketIOProvider('ws://localhost:1234', 'test', yDoc, {
+    const provider = createSocketIOProvider('ws://localhost:1234', roomId, yDoc, {
       awareness,
       autoConnect: false
     })

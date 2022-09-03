@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@textea/y-socket.io": "workspace:^",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "y-protocols": "^1.0.5",

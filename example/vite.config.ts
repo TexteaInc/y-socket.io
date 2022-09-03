@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'y-socket.io': resolve(__dirname, '..', 'src')
+      '@textea/y-socket.io': resolve(__dirname, '..', 'src')
     }
   }
 })

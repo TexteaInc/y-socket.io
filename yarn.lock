@@ -878,7 +878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@textea/y-socket.io@workspace:.":
+"@textea/y-socket.io@workspace:., @textea/y-socket.io@workspace:^":
   version: 0.0.0-use.local
   resolution: "@textea/y-socket.io@workspace:."
   dependencies:
@@ -6462,6 +6462,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "y-socket.io-example@workspace:example"
   dependencies:
+    "@textea/y-socket.io": "workspace:^"
     "@types/react": ^18.0.17
     "@types/react-dom": ^18.0.6
     "@types/web": ^0.0.72
