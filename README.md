@@ -1,11 +1,11 @@
-# y-socket.io
+# @textea/y-socket.io
 
 ## Usage
 
 ```shell
-npm install y-socket.io
+npm install @textea/y-socket.io
 # or
-yarn add y-socket.io
+yarn add @textea/y-socket.io
 # or
-pnpm install y-socket.io
+pnpm install @textea/y-socket.io
 ```
