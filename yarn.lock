@@ -930,6 +930,8 @@ __metadata:
   peerDependenciesMeta:
     react:
       optional: true
+  bin:
+    run-socketio-server: ./bin/run.ts
   languageName: unknown
   linkType: soft
 
