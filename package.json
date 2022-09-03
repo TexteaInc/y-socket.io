@@ -1,5 +1,5 @@
 {
-  "name": "y-socket.io",
+  "name": "@textea/y-socket.io",
   "version": "0.0.2",
   "private": true,
   "workspaces": [
