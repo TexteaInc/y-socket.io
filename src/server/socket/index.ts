@@ -3,9 +3,10 @@ import { Server, Socket } from 'socket.io'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
+import type { AwarenessChanges } from '../../awareness'
+import { getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { AwarenessChanges } from '../../types'
 import { createRoomMap, Room } from './room'
 
 /**
@@ -78,7 +79,7 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
         socket.emit('doc:diff', docDiff)
         const awarenessStates = room.awareness.getStates()
         if (awarenessStates.size) {
-          const clients = [...awarenessStates.keys()]
+          const clients = getClients(room.awareness)
           const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
           socket.emit('awareness:update', awarenessUpdate)
         }

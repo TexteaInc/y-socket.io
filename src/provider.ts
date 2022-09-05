@@ -5,13 +5,13 @@ import * as Y from 'yjs'
 import { createStore, Mutate, StoreApi } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
+import { AwarenessChanges, getClients, getOtherClients } from './awareness'
 import type {
   BroadcastChannelMessageData,
   BroadcastChannelMessageEvent,
   ClientToServerEvents,
   ServerToClientEvents
 } from './events'
-import type { AwarenessChanges } from './types'
 
 export interface Options {
   awareness?: Awareness
@@ -122,15 +122,13 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     applyAwarenessUpdate(awareness, new Uint8Array(update), socket)
   })
   socket.on('disconnect', (_reason, description) => {
+    const err = description instanceof Error ? description : null
+    const otherClients = getOtherClients(awareness)
+    removeAwarenessStates(awareness, otherClients, socket)
     syncingDocUpdates.clear()
-    const clients = [...awareness.getStates().keys()].filter(
-      (clientId) => clientId !== doc.clientID
-    )
-    removeAwarenessStates(awareness, clients, socket)
-    const err = description instanceof Error ? description.message : null
     store.setState({
       ...INITIAL_STATE,
-      error: err
+      error: err?.message
     })
   })
 
@@ -159,7 +157,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       }
       case 'awareness:query': {
         const [, clientId] = event.data
-        const clients = [...awareness.getStates().keys()]
+        const clients = getClients(awareness)
         const update = encodeAwarenessUpdate(awareness, clients)
         broadcastChannel!.postMessage(['awareness:update', update, clientId])
         break
