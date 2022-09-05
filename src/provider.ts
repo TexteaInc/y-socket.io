@@ -5,13 +5,14 @@ import * as Y from 'yjs'
 import { createStore, Mutate, StoreApi } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
+import { AwarenessChanges, getClients, getOtherClients } from './awareness'
 import type {
   BroadcastChannelMessageData,
   BroadcastChannelMessageEvent,
   ClientToServerEvents,
   ServerToClientEvents
 } from './events'
-import type { AwarenessChanges } from './types'
+import type { RoomName } from './types'
 
 export interface Options {
   awareness?: Awareness
@@ -57,7 +58,7 @@ export interface SocketIOProvider extends SocketIOProviderStore {
 
 type CreateSocketIOProvider = (
   serverUrl: string,
-  roomName: string,
+  roomName: RoomName,
   doc: Y.Doc,
   options?: Options
 ) => SocketIOProvider
@@ -102,7 +103,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       }
     })
     if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
+      const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
       socket.emit('awareness:update', roomName, awarenessUpdate)
     }
     store.setState({
@@ -122,15 +123,13 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     applyAwarenessUpdate(awareness, new Uint8Array(update), socket)
   })
   socket.on('disconnect', (_reason, description) => {
+    const err = description instanceof Error ? description : null
+    const otherClients = getOtherClients(awareness)
+    removeAwarenessStates(awareness, otherClients, socket)
     syncingDocUpdates.clear()
-    const clients = [...awareness.getStates().keys()].filter(
-      (clientId) => clientId !== doc.clientID
-    )
-    removeAwarenessStates(awareness, clients, socket)
-    const err = description instanceof Error ? description.message : null
     store.setState({
       ...INITIAL_STATE,
-      error: err
+      error: err?.message
     })
   })
 
@@ -152,21 +151,21 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       }
       case 'doc:update': {
         const [, updateV2, clientId] = event.data
-        if (!clientId || clientId === doc.clientID) {
+        if (!clientId || clientId === awareness.clientID) {
           Y.applyUpdateV2(doc, updateV2, socket)
         }
         break
       }
       case 'awareness:query': {
         const [, clientId] = event.data
-        const clients = [...awareness.getStates().keys()]
+        const clients = getClients(awareness)
         const update = encodeAwarenessUpdate(awareness, clients)
         broadcastChannel!.postMessage(['awareness:update', update, clientId])
         break
       }
       case 'awareness:update': {
         const [, update, clientId] = event.data
-        if (!clientId || clientId === doc.clientID) {
+        if (!clientId || clientId === awareness.clientID) {
           applyAwarenessUpdate(awareness, update, socket)
         }
         break
@@ -180,12 +179,12 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     broadcastChannel = new BroadcastChannel(broadcastChannelName)
     broadcastChannel.onmessage = handleBroadcastChannelMessage
     const docDiff = Y.encodeStateVector(doc)
-    broadcastChannel.postMessage(['doc:diff', docDiff, doc.clientID])
+    broadcastChannel.postMessage(['doc:diff', docDiff, awareness.clientID])
     const docUpdateV2 = Y.encodeStateAsUpdateV2(doc)
     broadcastChannel.postMessage(['doc:update', docUpdateV2])
-    broadcastChannel.postMessage(['awareness:query', doc.clientID])
+    broadcastChannel.postMessage(['awareness:query', awareness.clientID])
     if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
+      const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
       broadcastChannel.postMessage(['awareness:update', awarenessUpdate])
     }
   }

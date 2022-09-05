@@ -8,17 +8,17 @@ const yDoc = new Y.Doc()
 const yText = yDoc.getText()
 const roomId = 'test-id'
 
+const awareness = new Awareness(yDoc)
+
 type User = {
-  id: number
+  id: Awareness['clientID']
   name: string
 }
 
 const DEFAULT_USER: Readonly<User> = {
-  id: yDoc.clientID,
-  name: `ID_${yDoc.clientID.toString(16).toUpperCase()}`
+  id: awareness.clientID,
+  name: `ID_${awareness.clientID.toString(16).toUpperCase()}`
 }
-
-const awareness = new Awareness(yDoc)
 awareness.setLocalState(DEFAULT_USER)
 
 export const App: React.FC = () => {

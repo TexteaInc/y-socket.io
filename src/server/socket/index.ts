@@ -3,9 +3,11 @@ import { Server, Socket } from 'socket.io'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
+import type { AwarenessChanges } from '../../awareness'
+import { getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { AwarenessChanges } from '../../types'
+import type { RoomName } from '../../types'
 import { createRoomMap, Room } from './room'
 
 /**
@@ -30,7 +32,7 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
 
   const { adapter } = io.of('/')
 
-  adapter.on('create-room', (roomName: string) => {
+  adapter.on('create-room', (roomName: RoomName) => {
     // socket default room
     if (adapter.sids.has(roomName)) {
       return
@@ -54,19 +56,19 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
     }
     roomMap.set(roomName, createRoom())
   })
-  adapter.on('delete-room', (roomName: string) => {
+  adapter.on('delete-room', (roomName: RoomName) => {
     // socket default room
     if (adapter.sids.has(roomName)) {
       return
     }
     const loadingRoom = roomMap.get(roomName)!
-    const destroyRoom = async () => {
+    const destroyRoom = async (): Promise<void> => {
       const room = await loadingRoom
       await persistence?.writeState(roomName, room.doc)
       room.doc.destroy()
       room.awareness.destroy()
     }
-    destroyRoom()
+    void destroyRoom()
     roomMap.delete(roomName)
   })
 
@@ -78,7 +80,7 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
         socket.emit('doc:diff', docDiff)
         const awarenessStates = room.awareness.getStates()
         if (awarenessStates.size) {
-          const clients = [...awarenessStates.keys()]
+          const clients = getClients(room.awareness)
           const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
           socket.emit('awareness:update', awarenessUpdate)
         }
