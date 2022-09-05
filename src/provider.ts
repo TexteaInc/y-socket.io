@@ -12,6 +12,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents
 } from './events'
+import type { RoomName } from './types'
 
 export interface Options {
   awareness?: Awareness
@@ -57,7 +58,7 @@ export interface SocketIOProvider extends SocketIOProviderStore {
 
 type CreateSocketIOProvider = (
   serverUrl: string,
-  roomName: string,
+  roomName: RoomName,
   doc: Y.Doc,
   options?: Options
 ) => SocketIOProvider

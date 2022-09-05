@@ -1,6 +1,7 @@
-import type { Room as RoomName } from 'socket.io-adapter'
 import type { Awareness } from 'y-protocols/awareness'
 import type * as Y from 'yjs'
+
+import type { RoomName } from '../../types'
 
 export interface Room {
   doc: Y.Doc

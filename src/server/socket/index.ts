@@ -7,6 +7,7 @@ import type { AwarenessChanges } from '../../awareness'
 import { getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
+import type { RoomName } from '../../types'
 import { createRoomMap, Room } from './room'
 
 /**
@@ -31,7 +32,7 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
 
   const { adapter } = io.of('/')
 
-  adapter.on('create-room', (roomName: string) => {
+  adapter.on('create-room', (roomName: RoomName) => {
     // socket default room
     if (adapter.sids.has(roomName)) {
       return
@@ -55,7 +56,7 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
     }
     roomMap.set(roomName, createRoom())
   })
-  adapter.on('delete-room', (roomName: string) => {
+  adapter.on('delete-room', (roomName: RoomName) => {
     // socket default room
     if (adapter.sids.has(roomName)) {
       return

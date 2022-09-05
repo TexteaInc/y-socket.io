@@ -1,6 +1,8 @@
 import type * as Y from 'yjs'
 
+import type { RoomName } from './types'
+
 export interface Persistence {
-  bindState: (roomName: string, doc: Y.Doc) => Promise<void>
-  writeState: (roomName: string, doc: Y.Doc) => Promise<void>
+  bindState: (roomName: RoomName, doc: Y.Doc) => Promise<void>
+  writeState: (roomName: RoomName, doc: Y.Doc) => Promise<void>
 }
