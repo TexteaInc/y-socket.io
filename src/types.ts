@@ -1,5 +1,5 @@
 import type { Room } from 'socket.io-adapter'
-import type * as Y from 'yjs'
+import type { Awareness } from 'y-protocols/awareness'
 
 export type RoomName = Room
-export type ClientId = Y.Doc['clientID']
+export type ClientId = Awareness['clientID']

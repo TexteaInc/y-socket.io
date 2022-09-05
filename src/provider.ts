@@ -103,7 +103,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       }
     })
     if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
+      const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
       socket.emit('awareness:update', roomName, awarenessUpdate)
     }
     store.setState({
@@ -151,7 +151,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       }
       case 'doc:update': {
         const [, updateV2, clientId] = event.data
-        if (!clientId || clientId === doc.clientID) {
+        if (!clientId || clientId === awareness.clientID) {
           Y.applyUpdateV2(doc, updateV2, socket)
         }
         break
@@ -165,7 +165,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       }
       case 'awareness:update': {
         const [, update, clientId] = event.data
-        if (!clientId || clientId === doc.clientID) {
+        if (!clientId || clientId === awareness.clientID) {
           applyAwarenessUpdate(awareness, update, socket)
         }
         break
@@ -179,12 +179,12 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     broadcastChannel = new BroadcastChannel(broadcastChannelName)
     broadcastChannel.onmessage = handleBroadcastChannelMessage
     const docDiff = Y.encodeStateVector(doc)
-    broadcastChannel.postMessage(['doc:diff', docDiff, doc.clientID])
+    broadcastChannel.postMessage(['doc:diff', docDiff, awareness.clientID])
     const docUpdateV2 = Y.encodeStateAsUpdateV2(doc)
     broadcastChannel.postMessage(['doc:update', docUpdateV2])
-    broadcastChannel.postMessage(['awareness:query', doc.clientID])
+    broadcastChannel.postMessage(['awareness:query', awareness.clientID])
     if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [doc.clientID])
+      const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
       broadcastChannel.postMessage(['awareness:update', awarenessUpdate])
     }
   }
