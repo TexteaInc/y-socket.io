@@ -61,13 +61,13 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
       return
     }
     const loadingRoom = roomMap.get(roomName)!
-    const destroyRoom = async () => {
+    const destroyRoom = async (): Promise<void> => {
       const room = await loadingRoom
       await persistence?.writeState(roomName, room.doc)
       room.doc.destroy()
       room.awareness.destroy()
     }
-    destroyRoom()
+    void destroyRoom()
     roomMap.delete(roomName)
   })
 

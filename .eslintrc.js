@@ -12,5 +12,8 @@ module.exports = {
     next: {
       rootDir: 'app'
     }
+  },
+  rules: {
+    'no-void': ['error', { allowAsStatement: true }]
   }
 }
