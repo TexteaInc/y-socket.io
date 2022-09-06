@@ -10,6 +10,18 @@ import type { Persistence } from '../../persistence'
 import type { QueryParameters, RoomName } from '../../types'
 import { createRoomMap, Room } from './room'
 
+declare module 'socket.io' {
+  /**
+   * Data related to yjs
+   */
+  interface SocketYjsData {
+    roomName: RoomName
+  }
+  interface Socket {
+    yjs: SocketYjsData
+  }
+}
+
 /**
  * There are four scenarios:
  *  1. Signed User share sheet to specified person with write permission (both side need authorization)
@@ -28,6 +40,13 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     cors: process.env.NODE_ENV === 'development' ? {} : undefined
+  })
+
+  io.use((socket, next) => {
+    // handle auth and room permission
+    const { roomName } = socket.handshake.query as QueryParameters
+    socket.yjs = { roomName }
+    return next()
   })
 
   const { adapter } = io.of('/')
@@ -73,7 +92,7 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
   })
 
   io.on('connection', (socket) => {
-    const { roomName } = socket.handshake.query as QueryParameters
+    const { roomName } = socket.yjs
     socket.join(roomName)
     roomMap.get(roomName)!.then((room) => {
       const docDiff = Y.encodeStateVector(room.doc)
@@ -85,19 +104,19 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
         socket.emit('awareness:update', awarenessUpdate)
       }
     })
-    socket.on('doc:diff', (roomName, diff) => {
+    socket.on('doc:diff', (diff) => {
       roomMap.get(roomName)?.then((room) => {
         const updateV2 = Y.encodeStateAsUpdateV2(room.doc, diff)
         socket.emit('doc:update', updateV2)
       })
     })
-    socket.on('doc:update', (roomName, updateV2, callback) => {
+    socket.on('doc:update', (updateV2, callback) => {
       roomMap.get(roomName)?.then((room) => {
         Y.applyUpdateV2(room.doc, updateV2, socket.id)
         callback?.()
       })
     })
-    socket.on('awareness:update', (roomName, update) => {
+    socket.on('awareness:update', (update) => {
       roomMap.get(roomName)?.then((room) => {
         applyAwarenessUpdate(room.awareness, update, socket.id)
       })

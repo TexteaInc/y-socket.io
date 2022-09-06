@@ -1,4 +1,4 @@
-import type { ClientId, RoomName } from './types'
+import type { ClientId } from './types'
 
 type EventHandler = (...args: any[]) => void
 export type DefaultEvents = {
@@ -31,9 +31,9 @@ export type ServerToClientEvents = ValidateEvents<{
 }>
 
 export type ClientToServerEvents = ValidateEvents<{
-  ['doc:diff']: (roomName: RoomName, diff: Uint8Array) => void
-  ['doc:update']: (roomName: RoomName, updateV2: Uint8Array, callback?: () => void) => void
-  ['awareness:update']: (roomName: RoomName, update: Uint8Array) => void
+  ['doc:diff']: (diff: Uint8Array) => void
+  ['doc:update']: (updateV2: Uint8Array, callback?: () => void) => void
+  ['awareness:update']: (update: Uint8Array) => void
 }>
 
 type ClientToServerEventNames = keyof ClientToServerEvents

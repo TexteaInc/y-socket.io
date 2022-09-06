@@ -104,18 +104,18 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       error: null
     })
     const docDiff = Y.encodeStateVector(doc)
-    socket.emit('doc:diff', roomName, docDiff)
+    socket.emit('doc:diff', docDiff)
     socket.once('doc:update', () => {
       if (!syncingDocUpdates.size) {
         store.setState({ synced: true })
       }
     })
     const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
-    socket.emit('awareness:update', roomName, awarenessUpdate)
+    socket.emit('awareness:update', awarenessUpdate)
   })
   socket.on('doc:diff', (diff) => {
     const updateV2 = Y.encodeStateAsUpdateV2(doc, new Uint8Array(diff))
-    socket.emit('doc:update', roomName, updateV2)
+    socket.emit('doc:update', updateV2)
   })
   socket.on('doc:update', (updateV2) => {
     Y.applyUpdateV2(doc, new Uint8Array(updateV2), socket)
@@ -209,7 +209,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
       const updateId = uuid()
       syncingDocUpdates.add(updateId)
       store.setState({ synced: false })
-      socket.emit('doc:update', roomName, updateV2, () => {
+      socket.emit('doc:update', updateV2, () => {
         syncingDocUpdates.delete(updateId)
         if (!syncingDocUpdates.size) {
           store.setState({ synced: true })
@@ -226,7 +226,7 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     }
     const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
     const update = encodeAwarenessUpdate(awareness, changedClients)
-    socket.volatile.emit('awareness:update', roomName, update)
+    socket.volatile.emit('awareness:update', update)
     broadcastChannel?.postMessage(['awareness:update', update])
   }
   awareness.on('update', handleAwarenessUpdate)
