@@ -7,7 +7,7 @@ import type { AwarenessChanges } from '../../awareness'
 import { getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { RoomName } from '../../types'
+import type { QueryParameters, RoomName } from '../../types'
 import { createRoomMap, Room } from './room'
 
 /**
@@ -73,18 +73,17 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
   })
 
   io.on('connection', (socket) => {
-    socket.on('join', (roomName) => {
-      socket.join(roomName)
-      roomMap.get(roomName)!.then((room) => {
-        const docDiff = Y.encodeStateVector(room.doc)
-        socket.emit('doc:diff', docDiff)
-        const awarenessStates = room.awareness.getStates()
-        if (awarenessStates.size) {
-          const clients = getClients(room.awareness)
-          const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
-          socket.emit('awareness:update', awarenessUpdate)
-        }
-      })
+    const { roomName } = socket.handshake.query as QueryParameters
+    socket.join(roomName)
+    roomMap.get(roomName)!.then((room) => {
+      const docDiff = Y.encodeStateVector(room.doc)
+      socket.emit('doc:diff', docDiff)
+      const awarenessStates = room.awareness.getStates()
+      if (awarenessStates.size) {
+        const clients = getClients(room.awareness)
+        const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
+        socket.emit('awareness:update', awarenessUpdate)
+      }
     })
     socket.on('doc:diff', (roomName, diff) => {
       roomMap.get(roomName)?.then((room) => {

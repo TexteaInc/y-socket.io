@@ -1,5 +1,10 @@
 import type { ClientId, RoomName } from './types'
 
+type EventHandler = (...args: any[]) => void
+export type DefaultEvents = {
+  [eventName: string]: EventHandler
+}
+
 type EventNameWithScope<Scope extends string, Type extends string = string> = `${Scope}:${Type}`
 
 type YDocScope = 'doc'
@@ -9,10 +14,8 @@ type ObservableEventName = EventNameWithScope<ObservableScope>
 
 type ValidEventScope = ObservableScope
 
-type EventHandler = (...args: any[]) => void
-
 type ValidateEvents<
-  Events extends Record<string, EventHandler> & {
+  Events extends DefaultEvents & {
     [EventName in keyof Events]: EventName extends EventNameWithScope<infer EventScope>
       ? EventScope extends ValidEventScope
         ? Events[EventName]
@@ -28,7 +31,6 @@ export type ServerToClientEvents = ValidateEvents<{
 }>
 
 export type ClientToServerEvents = ValidateEvents<{
-  join: (roomName: RoomName) => void
   ['doc:diff']: (roomName: RoomName, diff: Uint8Array) => void
   ['doc:update']: (roomName: RoomName, updateV2: Uint8Array, callback?: () => void) => void
   ['awareness:update']: (roomName: RoomName, update: Uint8Array) => void
@@ -37,9 +39,9 @@ export type ClientToServerEvents = ValidateEvents<{
 type ClientToServerEventNames = keyof ClientToServerEvents
 
 export type BroadcastChannelMessageData<EventName extends ClientToServerEventNames = ClientToServerEventNames> =
-  | EventName extends ObservableEventName
+  | (EventName extends ObservableEventName
       ? [eventName: EventName, payload: Uint8Array, clientId?: ClientId]
-      : never
+      : never)
   | [eventName: `${AwarenessScope}:query`, clientId: ClientId]
 
 export type BroadcastChannelMessageEvent = MessageEvent<BroadcastChannelMessageData>

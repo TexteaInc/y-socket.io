@@ -12,7 +12,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents
 } from './events'
-import type { RoomName } from './types'
+import type { QueryParameters, RoomName } from './types'
 
 export interface Options {
   awareness?: Awareness
@@ -83,7 +83,11 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     }))
   )
 
+  const queryParameters: QueryParameters = {
+    roomName
+  }
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
+    query: queryParameters,
     autoConnect
   })
 
@@ -94,7 +98,11 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     })
   })
   socket.on('connect', () => {
-    socket.emit('join', roomName)
+    store.setState({
+      connecting: false,
+      connected: true,
+      error: null
+    })
     const docDiff = Y.encodeStateVector(doc)
     socket.emit('doc:diff', roomName, docDiff)
     socket.once('doc:update', () => {
@@ -102,15 +110,8 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
         store.setState({ synced: true })
       }
     })
-    if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
-      socket.emit('awareness:update', roomName, awarenessUpdate)
-    }
-    store.setState({
-      connecting: false,
-      connected: true,
-      error: null
-    })
+    const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
+    socket.emit('awareness:update', roomName, awarenessUpdate)
   })
   socket.on('doc:diff', (diff) => {
     const updateV2 = Y.encodeStateAsUpdateV2(doc, new Uint8Array(diff))
@@ -124,13 +125,13 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   })
   socket.on('disconnect', (_reason, description) => {
     const err = description instanceof Error ? description : null
-    const otherClients = getOtherClients(awareness)
-    removeAwarenessStates(awareness, otherClients, socket)
     syncingDocUpdates.clear()
     store.setState({
       ...INITIAL_STATE,
       error: err?.message
     })
+    const otherClients = getOtherClients(awareness)
+    removeAwarenessStates(awareness, otherClients, socket)
   })
 
   interface TypedBroadcastChannel extends BroadcastChannel {
@@ -176,17 +177,16 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     if (broadcastChannel) {
       return
     }
-    broadcastChannel = new BroadcastChannel(broadcastChannelName)
-    broadcastChannel.onmessage = handleBroadcastChannelMessage
+    broadcastChannel = Object.assign(new BroadcastChannel(broadcastChannelName), {
+      onmessage: handleBroadcastChannelMessage
+    })
     const docDiff = Y.encodeStateVector(doc)
     broadcastChannel.postMessage(['doc:diff', docDiff, awareness.clientID])
     const docUpdateV2 = Y.encodeStateAsUpdateV2(doc)
     broadcastChannel.postMessage(['doc:update', docUpdateV2])
     broadcastChannel.postMessage(['awareness:query', awareness.clientID])
-    if (awareness.getLocalState() !== null) {
-      const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
-      broadcastChannel.postMessage(['awareness:update', awarenessUpdate])
-    }
+    const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
+    broadcastChannel.postMessage(['awareness:update', awarenessUpdate])
   }
   const disconnectBroadcastChannel = () => {
     if (broadcastChannel) {
@@ -236,11 +236,11 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     connect: () => {
       const { connecting, connected } = store.getState()
       if (!connecting && !connected) {
-        socket.connect()
         store.setState({
           connecting: true,
           error: null
         })
+        socket.connect()
       }
     },
     disconnect: () => {
