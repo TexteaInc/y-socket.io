@@ -8,7 +8,7 @@ import { getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
 import type { ClientId, RoomName } from '../../types'
-import { createRoomMap, Room } from './room'
+import type { GetDoc, Room } from './room'
 import type { GetUserId, UserId } from './user'
 
 declare module 'socket.io' {
@@ -44,7 +44,7 @@ export interface Options {
  */
 
 export const createSocketServer = (httpServer: HTTPServer, { getUserId, persistence }: Options = {}) => {
-  const roomMap = createRoomMap()
+  const roomMap = new Map<RoomName, Room>()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     cors: process.env.NODE_ENV === 'development' ? {} : undefined
@@ -78,80 +78,103 @@ export const createSocketServer = (httpServer: HTTPServer, { getUserId, persiste
   const { adapter } = io.of('/')
 
   adapter.on('create-room', (roomName: RoomName) => {
-    // socket default room
-    if (adapter.sids.has(roomName)) {
+    if (adapter.sids.has(roomName) || roomMap.has(roomName)) {
+      //        ^^^^ Map<SocketId, Set<RoomName>>
       return
     }
-    const createRoom = async (): Promise<Room> => {
-      const doc = new Y.Doc()
+    const doc = new Y.Doc()
+    const prepareDoc = async (): Promise<Y.Doc> => {
       await persistence?.bindState(roomName, doc)
       doc.on('update', (updateV1: Uint8Array, origin: Socket['id']) => {
         const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
         io.to(roomName).except(origin).emit('doc:update', updateV2)
       })
-      const awareness = new Awareness(doc)
-      // delete local `clientId` from `awareness.getStates()` Map
-      awareness.setLocalState(null)
-      awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
-        const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
-        const update = encodeAwarenessUpdate(awareness, changedClients)
-        io.to(roomName).except(origin).emit('awareness:update', update)
-      })
-      return { doc, awareness }
+      return doc
     }
-    roomMap.set(roomName, createRoom())
-  })
-  adapter.on('delete-room', (roomName: RoomName) => {
-    // socket default room
-    if (adapter.sids.has(roomName)) {
-      return
-    }
-    const loadingRoom = roomMap.get(roomName)!
-    const destroyRoom = async (): Promise<void> => {
-      const room = await loadingRoom
-      await persistence?.writeState(roomName, room.doc)
-      room.doc.destroy()
-      room.awareness.destroy()
-    }
-    void destroyRoom()
-    roomMap.delete(roomName)
+    const preparingDoc = prepareDoc()
+    const getDoc: GetDoc = () => preparingDoc
+    const awareness = new Awareness(doc)
+    // delete local `clientId` from `awareness.getStates()` Map
+    awareness.setLocalState(null)
+    awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
+      const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
+      const update = encodeAwarenessUpdate(awareness, changedClients)
+      io.to(roomName).except(origin).emit('awareness:update', update)
+    })
+    roomMap.set(roomName, {
+      owner: null!,
+      getDoc,
+      awareness
+    })
   })
 
   io.on('connection', (socket) => {
     const { roomName } = socket.yjs
     socket.join(roomName)
-    roomMap.get(roomName)!.then((room) => {
-      const docDiff = Y.encodeStateVector(room.doc)
+
+    const room = roomMap.get(roomName)!
+    if (room.owner === null) {
+      room.owner = socket.userId
+    }
+    room.getDoc().then((doc) => {
+      const docDiff = Y.encodeStateVector(doc)
       socket.emit('doc:diff', docDiff)
-      const awarenessStates = room.awareness.getStates()
-      if (awarenessStates.size) {
-        const clients = getClients(room.awareness)
-        const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
-        socket.emit('awareness:update', awarenessUpdate)
+    })
+    const awarenessStates = room.awareness.getStates()
+    if (awarenessStates.size) {
+      const clients = getClients(room.awareness)
+      const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
+      socket.emit('awareness:update', awarenessUpdate)
+    }
+
+    socket.on('room:close', () => {
+      const room = roomMap.get(roomName)
+      if (!room || socket.userId !== room.owner) {
+        return
       }
+      const destroyDoc = async (): Promise<void> => {
+        const doc = await room.getDoc()
+        await persistence?.writeState(roomName, doc)
+        doc.destroy()
+      }
+      void destroyDoc()
+      roomMap.delete(roomName)
+      socket.to(roomName).disconnectSockets(true)
     })
     socket.on('doc:diff', (diff) => {
-      roomMap.get(roomName)?.then((room) => {
-        const updateV2 = Y.encodeStateAsUpdateV2(room.doc, diff)
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      room.getDoc().then((doc) => {
+        const updateV2 = Y.encodeStateAsUpdateV2(doc, diff)
         socket.emit('doc:update', updateV2)
       })
     })
     socket.on('doc:update', (updateV2, callback) => {
-      roomMap.get(roomName)?.then((room) => {
-        Y.applyUpdateV2(room.doc, updateV2, socket.id)
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      room.getDoc().then((doc) => {
+        Y.applyUpdateV2(doc, updateV2, socket.id)
         callback?.()
       })
     })
     socket.on('awareness:update', (update) => {
-      roomMap.get(roomName)?.then((room) => {
-        applyAwarenessUpdate(room.awareness, update, socket.id)
-      })
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      applyAwarenessUpdate(room.awareness, update, socket.id)
     })
     socket.on('disconnect', () => {
-      roomMap.get(roomName)?.then((room) => {
-        const { clientId } = socket.yjs
-        removeAwarenessStates(room.awareness, [clientId], socket.id)
-      })
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      const { clientId } = socket.yjs
+      removeAwarenessStates(room.awareness, [clientId], socket.id)
     })
   })
 

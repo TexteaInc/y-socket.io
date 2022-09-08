@@ -8,13 +8,14 @@ export type DefaultEvents = {
 type EventNameWithScope<Scope extends string, Type extends string = string> = `${Scope}:${Type}`
 
 type DataScope = 'data'
+type RoomScope = 'room'
 
 type YDocScope = 'doc'
 type AwarenessScope = 'awareness'
 type ObservableScope = YDocScope | AwarenessScope
 type ObservableEventName = EventNameWithScope<ObservableScope>
 
-type ValidEventScope = DataScope | ObservableScope
+type ValidEventScope = DataScope | RoomScope | ObservableScope
 
 type ValidateEvents<
   Events extends DefaultEvents & {
@@ -34,6 +35,7 @@ export type ServerToClientEvents<ClientData extends DefaultClientData = DefaultC
 }>
 
 export type ClientToServerEvents = ValidateEvents<{
+  ['room:close']: () => void
   ['doc:diff']: (diff: Uint8Array) => void
   ['doc:update']: (updateV2: Uint8Array, callback?: () => void) => void
   ['awareness:update']: (update: Uint8Array) => void
