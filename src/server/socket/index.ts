@@ -9,6 +9,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
 import type { ClientId, RoomName } from '../../types'
 import { createRoomMap, Room } from './room'
+import type { GetUserId, UserId } from './user'
 
 declare module 'socket.io' {
   /**
@@ -20,7 +21,13 @@ declare module 'socket.io' {
   }
   interface Socket {
     yjs: SocketYjsData
+    userId: UserId
   }
+}
+
+export interface Options {
+  getUserId?: GetUserId
+  persistence?: Persistence
 }
 
 /**
@@ -36,7 +43,7 @@ declare module 'socket.io' {
  * We only consider scenario 3 for now, because It's easy to implement
  */
 
-export const createSocketServer = (httpServer: HTTPServer, persistence?: Persistence) => {
+export const createSocketServer = (httpServer: HTTPServer, { getUserId, persistence }: Options) => {
   const roomMap = createRoomMap()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
@@ -56,6 +63,15 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
       roomName,
       clientId: Number(clientId)
     }
+    return next()
+  })
+
+  io.use((socket, next) => {
+    const result = getUserId?.(socket) ?? socket.yjs.clientId
+    if (result instanceof Error) {
+      return next(result)
+    }
+    socket.userId = result
     return next()
   })
 
