@@ -7,7 +7,7 @@ import type { AwarenessChanges } from '../../awareness'
 import { getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { RoomName } from '../../types'
+import type { ClientId, RoomName } from '../../types'
 import { createRoomMap, Room } from './room'
 
 declare module 'socket.io' {
@@ -16,6 +16,7 @@ declare module 'socket.io' {
    */
   interface SocketYjsData {
     roomName: RoomName
+    clientId: ClientId
   }
   interface Socket {
     yjs: SocketYjsData
@@ -44,11 +45,17 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
 
   io.use((socket, next) => {
     // handle auth and room permission
-    const { roomName } = socket.handshake.query
+    const { roomName, clientId } = socket.handshake.query
     if (typeof roomName !== 'string') {
       return next(new Error("wrong type of query parameter 'roomName'"))
     }
-    socket.yjs = { roomName }
+    if (typeof clientId !== 'string' || Number.isNaN(clientId)) {
+      return next(new Error("wrong type of query parameter 'clientId'"))
+    }
+    socket.yjs = {
+      roomName,
+      clientId: Number(clientId)
+    }
     return next()
   })
 

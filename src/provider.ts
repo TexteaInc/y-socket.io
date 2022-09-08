@@ -94,7 +94,8 @@ export const createSocketIOProvider: CreateSocketIOProvider = <ClientData extend
   )
 
   const queryParameters: QueryParameters = {
-    roomName
+    roomName,
+    clientId: String(awareness.clientID)
   }
   const socket: Socket<ServerToClientEvents<ClientData>, ClientToServerEvents> = io(serverUrl, {
     query: queryParameters,

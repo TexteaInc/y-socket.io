@@ -8,5 +8,6 @@ export type DefaultClientData = {}
 
 export interface QueryParameters {
   [key: string]: string | string[] | undefined
-  roomName: RoomName
+  roomName: string
+  clientId: string
 }
