@@ -1,4 +1,4 @@
-import type { ClientId } from './types'
+import type { ClientId, DefaultClientData } from './types'
 
 type EventHandler = (...args: any[]) => void
 export type DefaultEvents = {
@@ -7,12 +7,14 @@ export type DefaultEvents = {
 
 type EventNameWithScope<Scope extends string, Type extends string = string> = `${Scope}:${Type}`
 
+type DataScope = 'data'
+
 type YDocScope = 'doc'
 type AwarenessScope = 'awareness'
 type ObservableScope = YDocScope | AwarenessScope
 type ObservableEventName = EventNameWithScope<ObservableScope>
 
-type ValidEventScope = ObservableScope
+type ValidEventScope = DataScope | ObservableScope
 
 type ValidateEvents<
   Events extends DefaultEvents & {
@@ -24,7 +26,8 @@ type ValidateEvents<
   }
 > = Events
 
-export type ServerToClientEvents = ValidateEvents<{
+export type ServerToClientEvents<ClientData extends DefaultClientData = DefaultClientData> = ValidateEvents<{
+  ['data:update']: (data: ClientData) => void
   ['doc:diff']: (diff: ArrayBuffer) => void
   ['doc:update']: (updateV2: ArrayBuffer) => void
   ['awareness:update']: (update: ArrayBuffer) => void
