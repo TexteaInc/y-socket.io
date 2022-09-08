@@ -43,7 +43,7 @@ export interface Options {
  * We only consider scenario 3 for now, because It's easy to implement
  */
 
-export const createSocketServer = (httpServer: HTTPServer, { getUserId, persistence }: Options = {}) => {
+export const createSocketServer = (httpServer: HTTPServer, { getUserId, persistence }: Options) => {
   const roomMap = new Map<RoomName, Room>()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
