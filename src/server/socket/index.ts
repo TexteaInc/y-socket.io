@@ -56,7 +56,7 @@ export const createSocketServer = (httpServer: HTTPServer, { getUserId, persiste
     if (typeof roomName !== 'string') {
       return next(new Error("wrong type of query parameter 'roomName'"))
     }
-    if (typeof clientId !== 'string' || Number.isNaN(clientId)) {
+    if (typeof clientId !== 'string' || Number.isNaN(+clientId)) {
       return next(new Error("wrong type of query parameter 'clientId'"))
     }
     socket.yjs = {
