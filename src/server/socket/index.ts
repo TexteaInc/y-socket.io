@@ -1,6 +1,6 @@
 import type { Server as HTTPServer } from 'http'
 import { Server, Socket } from 'socket.io'
-import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
 import type { AwarenessChanges } from '../../awareness'
@@ -129,6 +129,12 @@ export const createSocketServer = (httpServer: HTTPServer, persistence?: Persist
     socket.on('awareness:update', (update) => {
       roomMap.get(roomName)?.then((room) => {
         applyAwarenessUpdate(room.awareness, update, socket.id)
+      })
+    })
+    socket.on('disconnect', () => {
+      roomMap.get(roomName)?.then((room) => {
+        const { clientId } = socket.yjs
+        removeAwarenessStates(room.awareness, [clientId], socket.id)
       })
     })
   })
