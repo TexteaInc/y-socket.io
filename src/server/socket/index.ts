@@ -162,7 +162,7 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
       }
       void room.destroy()
       roomMap.delete(roomName)
-      socket.to(roomName).disconnectSockets(true)
+      socket.broadcast.to(roomName).disconnectSockets(true)
     })
     socket.on('doc:diff', (diff) => {
       const room = roomMap.get(roomName)
