@@ -28,6 +28,10 @@ declare module 'socket.io' {
 export interface Options {
   getUserId?: GetUserId
   persistence?: Persistence
+  /**
+   * @default false
+   */
+  autoDeleteRoom?: boolean
 }
 
 /**
@@ -43,7 +47,10 @@ export interface Options {
  * We only consider scenario 3 for now, because It's easy to implement
  */
 
-export const createSocketServer = (httpServer: HTTPServer, { getUserId, persistence }: Options) => {
+export const createSocketServer = (
+  httpServer: HTTPServer,
+  { getUserId, persistence, autoDeleteRoom = false }: Options
+) => {
   const roomMap = new Map<RoomName, Room>()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
@@ -101,12 +108,29 @@ export const createSocketServer = (httpServer: HTTPServer, { getUserId, persiste
       const update = encodeAwarenessUpdate(awareness, changedClients)
       io.to(roomName).except(origin).emit('awareness:update', update)
     })
-    roomMap.set(roomName, {
+    const room: Room = {
       owner: null!,
       getDoc,
-      awareness
-    })
+      awareness,
+      destroy: async () => {
+        await persistence?.writeState(roomName, doc)
+        doc.destroy()
+        awareness.destroy()
+      }
+    }
+    roomMap.set(roomName, room)
   })
+
+  if (autoDeleteRoom) {
+    adapter.on('delete-room', (roomName: RoomName) => {
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      void room.destroy()
+      roomMap.delete(roomName)
+    })
+  }
 
   io.on('connection', (socket) => {
     const { roomName } = socket.yjs
@@ -132,12 +156,7 @@ export const createSocketServer = (httpServer: HTTPServer, { getUserId, persiste
       if (!room || socket.userId !== room.owner) {
         return
       }
-      const destroyDoc = async (): Promise<void> => {
-        const doc = await room.getDoc()
-        await persistence?.writeState(roomName, doc)
-        doc.destroy()
-      }
-      void destroyDoc()
+      void room.destroy()
       roomMap.delete(roomName)
       socket.to(roomName).disconnectSockets(true)
     })

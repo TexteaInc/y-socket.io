@@ -9,4 +9,5 @@ export interface Room {
   owner: UserId
   getDoc: GetDoc
   awareness: Awareness
+  destroy: () => Promise<void>
 }
