@@ -6,7 +6,7 @@ import * as Y from 'yjs'
 import { AwarenessChanges, getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { ClientId, RoomName } from '../../types'
+import type { ClientId, DefaultClientData, RoomName } from '../../types'
 import type { Room } from './room'
 import type { GetUserId, UserId } from './user'
 
@@ -25,6 +25,9 @@ declare module 'socket.io' {
 }
 
 export interface Options {
+  /**
+   * Handle auth and room permission
+   */
   getUserId?: GetUserId
   persistence?: Persistence
   /**
@@ -32,6 +35,11 @@ export interface Options {
    */
   autoDeleteRoom?: boolean
 }
+
+type CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
+  httpServer: HTTPServer,
+  options?: Options
+) => Server<ClientToServerEvents, ServerToClientEvents<ClientData>>
 
 /**
  * There are four scenarios:
@@ -46,18 +54,17 @@ export interface Options {
  * We only consider scenario 3 for now, because It's easy to implement
  */
 
-export const createSocketServer = (
+export const createSocketIOServer: CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
   httpServer: HTTPServer,
-  { getUserId, persistence, autoDeleteRoom = false }: Options
+  { getUserId, persistence, autoDeleteRoom = false }: Options = {}
 ) => {
   const roomMap = new Map<RoomName, Room>()
 
-  const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
+  const io = new Server<ClientToServerEvents, ServerToClientEvents<ClientData>>(httpServer, {
     cors: process.env.NODE_ENV === 'development' ? {} : undefined
   })
 
   io.use((socket, next) => {
-    // handle auth and room permission
     const { roomName, clientId } = socket.handshake.query
     if (typeof roomName !== 'string') {
       return next(new Error("wrong type of query parameter 'roomName'"))

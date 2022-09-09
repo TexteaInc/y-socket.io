@@ -1,14 +1,14 @@
-import { createServer } from 'http'
+import { createServer as createHTTPServer, Server as HTTPServer } from 'http'
 
-import { createSocketServer, Options } from './socket'
+import { createSocketIOServer, Options } from './socket'
 
-export const createYDocServer = (options: Options = {}) => {
-  const server = createServer((request, response) => {
+export * from './socket'
+
+export const createSimpleServer = (options: Options = {}): HTTPServer => {
+  const httpServer = createHTTPServer((request, response) => {
     response.writeHead(200, { 'Content-Type': 'application/json' })
     response.end('"okay"')
   })
-
-  createSocketServer(server, options)
-
-  return server
+  createSocketIOServer(httpServer, options)
+  return httpServer
 }
