@@ -7,7 +7,7 @@ import { AwarenessChanges, getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
 import type { ClientId, DefaultClientData, RoomName } from '../../types'
-import type { Room } from './room'
+import type { Room, RoomMap } from './room'
 import type { GetUserId, UserId } from './user'
 
 declare module 'socket.io' {
@@ -15,6 +15,7 @@ declare module 'socket.io' {
    * Data related to yjs
    */
   interface SocketYjsData {
+    roomMap: RoomMap
     roomName: RoomName
     clientId: ClientId
   }
@@ -58,7 +59,7 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
   httpServer: HTTPServer,
   { getUserId, persistence, autoDeleteRoom = false }: Options = {}
 ) => {
-  const roomMap = new Map<RoomName, Room>()
+  const roomMap: RoomMap = new Map()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents<ClientData>>(httpServer, {
     cors: process.env.NODE_ENV === 'development' ? {} : undefined
@@ -73,6 +74,7 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
       return next(new Error("wrong type of query parameter 'clientId'"))
     }
     socket.yjs = {
+      roomMap,
       roomName,
       clientId: Number(clientId)
     }

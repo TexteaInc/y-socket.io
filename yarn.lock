@@ -896,7 +896,6 @@ __metadata:
     "@typescript-eslint/parser": ^5.33.0
     "@vitest/ui": ^0.22.1
     cookie: ^0.5.0
-    cross-env: ^7.0.3
     eslint: ^8.22.0
     eslint-config-standard: ^17.0.0
     eslint-plugin-cypress: ^2.12.1
@@ -910,7 +909,6 @@ __metadata:
     express: ^4.18.1
     husky: ^8.0.1
     lint-staged: ^13.0.3
-    nodemon: ^2.0.19
     prettier: ^2.7.1
     socket.io: ^4.5.1
     socket.io-adapter: ^2.4.0
@@ -6049,6 +6047,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tsconfig-paths@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "tsconfig-paths@npm:4.1.0"
+  dependencies:
+    json5: ^2.2.1
+    minimist: ^1.2.6
+    strip-bom: ^3.0.0
+  checksum: e4b101f81b2abd95499d8145e0aa73144e857c2c359191058486cef101b7accae22a69114e5d5814a13d5ab3b0bae70dd0c85bcdb7e829bbe1bfda5c9067c9b1
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^1.8.1":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
@@ -6464,13 +6473,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "y-socket.io-example@workspace:example"
   dependencies:
+    "@swc/core": ^1.2.242
     "@textea/y-socket.io": "workspace:^"
+    "@types/node": ^18.7.13
     "@types/react": ^18.0.17
     "@types/react-dom": ^18.0.6
     "@types/web": ^0.0.72
     "@vitejs/plugin-react": ^2.0.1
+    cross-env: ^7.0.3
+    nodemon: ^2.0.19
     react: ^18.2.0
     react-dom: ^18.2.0
+    ts-node: ^10.9.1
+    tsconfig-paths: ^4.1.0
     typescript: ^4.6.4
     vite: ^3.0.7
     y-protocols: ^1.0.5

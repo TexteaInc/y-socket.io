@@ -4,6 +4,8 @@ import React, { useDeferredValue, useEffect, useState } from 'react'
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
+import { ClientData } from './types'
+
 const yDoc = new Y.Doc()
 const yText = yDoc.getText()
 const roomId = 'test-id'
@@ -23,13 +25,15 @@ awareness.setLocalState(DEFAULT_USER)
 
 export const App: React.FC = () => {
   const [text, setText] = useState('')
-  const [name, setName] = useState(DEFAULT_USER.name)
-  const [others, setOthers] = useState<User[]>([])
+  const [userName, setUserName] = useState(DEFAULT_USER.name)
+  const [otherUsers, setOtherUsers] = useState<User[]>([])
 
-  const [provider, setProvider] = useState<SocketIOProvider>()
+  const [provider, setProvider] = useState<SocketIOProvider<ClientData>>()
+
   const isConnecting = useSocketIOProviderState(provider, (state) => state.connecting)
   const isConnected = useSocketIOProviderState(provider, (state) => state.connected)
   const isSynced = useSocketIOProviderState(provider, (state) => state.synced)
+
   const deferredIsSynced = useDeferredValue(isSynced)
 
   const status = isConnecting
@@ -40,24 +44,34 @@ export const App: React.FC = () => {
         : 'Syncing'
       : 'Disconnected'
 
+  const clientData = useSocketIOProviderState(provider, (state) => state.data)
+
+  const role = isConnected
+    ? clientData
+      ? clientData.isOwner
+        ? 'Admin'
+        : 'User'
+      : 'Loading'
+    : 'Not Available'
+
   useEffect(() => {
     const yTextObserver = () => {
       setText(yText.toJSON())
     }
     yText.observe(yTextObserver)
     const handleAwarenessUpdate = () => {
-      const self = awareness.getLocalState() as User | null
-      if (self) {
-        setName(self.name)
+      const localUser = awareness.getLocalState() as User | null
+      if (localUser) {
+        setUserName(localUser.name)
       }
-      setOthers(
+      setOtherUsers(
         [...awareness.getStates().entries()]
           .filter(([clientId]) => clientId !== yDoc.clientID)
           .map(([, state]) => state as User)
       )
     }
     awareness.on('update', handleAwarenessUpdate)
-    const provider = createSocketIOProvider('ws://localhost:1234', roomId, yDoc, {
+    const provider = createSocketIOProvider<ClientData>('ws://localhost:1234', roomId, yDoc, {
       awareness,
       autoConnect: false
     })
@@ -70,7 +84,7 @@ export const App: React.FC = () => {
   }, [])
 
   if (!provider) {
-    return <p>loading...</p>
+    return <p>Loading...</p>
   }
 
   return (
@@ -89,6 +103,7 @@ export const App: React.FC = () => {
         </button>
       </p>
       <p>Status: {status}</p>
+      <p>Role: {role}</p>
       <p>
         <label htmlFor='text'>Text: </label>
         <input
@@ -106,17 +121,17 @@ export const App: React.FC = () => {
         <label htmlFor='name'>Name: </label>
         <input
           id='name'
-          value={name}
+          value={userName}
           onChange={(event) => {
             awareness.setLocalStateField('name', event.target.value)
           }}
         />
       </p>
-      {others.length > 0 && (
+      {otherUsers.length > 0 && (
         <div>
           <div>Users: </div>
           <ul>
-            {others.map((user) => (
+            {otherUsers.map((user) => (
               <li key={user.id}>{user.name}</li>
             ))}
           </ul>
