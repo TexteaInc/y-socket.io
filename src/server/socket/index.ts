@@ -3,12 +3,11 @@ import { Server, Socket } from 'socket.io'
 import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
-import type { AwarenessChanges } from '../../awareness'
-import { getClients } from '../../awareness'
+import { AwarenessChanges, getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
 import type { ClientId, RoomName } from '../../types'
-import type { GetDoc, Room } from './room'
+import type { Room } from './room'
 import type { GetUserId, UserId } from './user'
 
 declare module 'socket.io' {
@@ -90,6 +89,14 @@ export const createSocketServer = (
       return
     }
     const doc = new Y.Doc()
+    const awareness = new Awareness(doc)
+    // delete local `clientId` from `awareness.getStates()` Map
+    awareness.setLocalState(null)
+    awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
+      const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
+      const update = encodeAwarenessUpdate(awareness, changedClients)
+      io.to(roomName).except(origin).emit('awareness:update', update)
+    })
     const prepareDoc = async (): Promise<Y.Doc> => {
       await persistence?.bindState(roomName, doc)
       doc.on('update', (updateV1: Uint8Array, origin: Socket['id']) => {
@@ -99,19 +106,10 @@ export const createSocketServer = (
       return doc
     }
     const preparingDoc = prepareDoc()
-    const getDoc: GetDoc = () => preparingDoc
-    const awareness = new Awareness(doc)
-    // delete local `clientId` from `awareness.getStates()` Map
-    awareness.setLocalState(null)
-    awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
-      const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
-      const update = encodeAwarenessUpdate(awareness, changedClients)
-      io.to(roomName).except(origin).emit('awareness:update', update)
-    })
     const room: Room = {
       owner: null!,
-      getDoc,
       awareness,
+      getDoc: () => preparingDoc,
       destroy: async () => {
         await persistence?.writeState(roomName, doc)
         doc.destroy()
@@ -140,16 +138,15 @@ export const createSocketServer = (
     if (room.owner === null) {
       room.owner = socket.userId
     }
+    const clients = getClients(room.awareness)
+    if (clients.length) {
+      const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
+      socket.emit('awareness:update', awarenessUpdate)
+    }
     room.getDoc().then((doc) => {
       const docDiff = Y.encodeStateVector(doc)
       socket.emit('doc:diff', docDiff)
     })
-    const awarenessStates = room.awareness.getStates()
-    if (awarenessStates.size) {
-      const clients = getClients(room.awareness)
-      const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
-      socket.emit('awareness:update', awarenessUpdate)
-    }
 
     socket.on('room:close', () => {
       const room = roomMap.get(roomName)
