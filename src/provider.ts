@@ -12,7 +12,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents
 } from './events'
-import type { QueryParameters, RoomName } from './types'
+import type { DefaultClientData, QueryParameters, RoomName } from './types'
 
 export interface Options {
   awareness?: Awareness
@@ -26,57 +26,68 @@ export interface Options {
   autoConnectBroadcastChannel?: boolean
 }
 
-export interface SocketIOProviderState {
+interface SocketState {
   connecting: boolean
   connected: boolean
   synced: boolean
   error: string | null
 }
 
-/**
- * @internal
- */
-export const INITIAL_STATE: Readonly<SocketIOProviderState> = {
+const INITIAL_SOCKET_STATE: Readonly<SocketState> = {
   connecting: false,
   connected: false,
   synced: false,
   error: null
 }
 
+export interface SocketIOProviderState<ClientData extends DefaultClientData = DefaultClientData> extends SocketState {
+  data: ClientData | null
+}
+
+/**
+ * @internal
+ */
+export const INITIAL_STATE: Readonly<SocketIOProviderState<any>> = {
+  ...INITIAL_SOCKET_STATE,
+  data: null
+}
+
 type ReadonlyStore<Store extends StoreApi<unknown>> = Omit<Store, 'setState'>
 
-type SocketIOProviderStore = ReadonlyStore<
-  Mutate<StoreApi<SocketIOProviderState>, [['zustand/subscribeWithSelector', never]]>
+type SocketIOProviderStore<ClientData extends DefaultClientData> = ReadonlyStore<
+  Mutate<StoreApi<SocketIOProviderState<ClientData>>, [['zustand/subscribeWithSelector', never]]>
 >
 
-export interface SocketIOProvider extends SocketIOProviderStore {
+export interface SocketIOProvider<ClientData extends DefaultClientData = DefaultClientData>
+  extends SocketIOProviderStore<ClientData> {
   connect: () => void
+  closeRoom: () => void
   disconnect: () => void
   connectBroadcastChannel: () => void
   disconnectBroadcastChannel: () => void
 }
 
-type CreateSocketIOProvider = (
+type CreateSocketIOProvider = <ClientData extends DefaultClientData>(
   serverUrl: string,
   roomName: RoomName,
   doc: Y.Doc,
   options?: Options
-) => SocketIOProvider
+) => SocketIOProvider<ClientData>
 
-export const createSocketIOProvider: CreateSocketIOProvider = (
-  serverUrl,
-  roomName,
-  doc,
+export const createSocketIOProvider: CreateSocketIOProvider = <ClientData extends DefaultClientData>(
+  serverUrl: string,
+  roomName: RoomName,
+  doc: Y.Doc,
   {
     awareness = new Awareness(doc),
     autoConnect = true,
     autoConnectBroadcastChannel = true
-  } = {}
+  }: Options = {}
 ) => {
   type DocUpdateId = string
   const syncingDocUpdates = new Set<DocUpdateId>()
 
-  const store = createStore<SocketIOProviderState>()(
+  const store = createStore<SocketIOProviderState<ClientData>>()(
     subscribeWithSelector(() => ({
       ...INITIAL_STATE,
       connecting: autoConnect
@@ -84,9 +95,10 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
   )
 
   const queryParameters: QueryParameters = {
-    roomName
+    roomName,
+    clientId: String(awareness.clientID)
   }
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(serverUrl, {
+  const socket: Socket<ServerToClientEvents<ClientData>, ClientToServerEvents> = io(serverUrl, {
     query: queryParameters,
     autoConnect
   })
@@ -112,6 +124,9 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
     })
     const awarenessUpdate = encodeAwarenessUpdate(awareness, [awareness.clientID])
     socket.emit('awareness:update', awarenessUpdate)
+  })
+  socket.on('data:update', (data) => {
+    store.setState({ data })
   })
   socket.on('doc:diff', (diff) => {
     const updateV2 = Y.encodeStateAsUpdateV2(doc, new Uint8Array(diff))
@@ -242,6 +257,9 @@ export const createSocketIOProvider: CreateSocketIOProvider = (
         })
         socket.connect()
       }
+    },
+    closeRoom: () => {
+      socket.volatile.emit('room:close')
     },
     disconnect: () => {
       socket.disconnect()

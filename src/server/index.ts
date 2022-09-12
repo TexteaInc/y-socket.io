@@ -1,15 +1,14 @@
-import { createServer } from 'http'
+import { createServer as createHTTPServer, Server as HTTPServer } from 'http'
 
-import type { Persistence } from '../persistence'
-import { createSocketServer } from './socket'
+import { createSocketIOServer, Options } from './socket'
 
-export const createYDocServer = (persistence?: Persistence) => {
-  const server = createServer((request, response) => {
+export * from './socket'
+
+export const createSimpleServer = (options: Options = {}): HTTPServer => {
+  const httpServer = createHTTPServer((request, response) => {
     response.writeHead(200, { 'Content-Type': 'application/json' })
     response.end('"okay"')
   })
-
-  createSocketServer(server, persistence)
-
-  return server
+  createSocketIOServer(httpServer, options)
+  return httpServer
 }

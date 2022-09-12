@@ -1,26 +1,46 @@
 import type { Server as HTTPServer } from 'http'
 import { Server, Socket } from 'socket.io'
-import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness'
+import { applyAwarenessUpdate, Awareness, encodeAwarenessUpdate, removeAwarenessStates } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
-import type { AwarenessChanges } from '../../awareness'
-import { getClients } from '../../awareness'
+import { AwarenessChanges, getClients } from '../../awareness'
 import type { ClientToServerEvents, ServerToClientEvents } from '../../events'
 import type { Persistence } from '../../persistence'
-import type { RoomName } from '../../types'
-import { createRoomMap, Room } from './room'
+import type { ClientId, DefaultClientData, RoomName } from '../../types'
+import type { Room, RoomMap } from './room'
+import type { GetUserId, UserId } from './user'
 
 declare module 'socket.io' {
   /**
    * Data related to yjs
    */
   interface SocketYjsData {
+    roomMap: RoomMap
     roomName: RoomName
+    clientId: ClientId
   }
   interface Socket {
     yjs: SocketYjsData
+    userId: UserId
   }
 }
+
+export interface Options {
+  /**
+   * Handle auth and room permission
+   */
+  getUserId?: GetUserId
+  persistence?: Persistence
+  /**
+   * @default false
+   */
+  autoDeleteRoom?: boolean
+}
+
+type CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
+  httpServer: HTTPServer,
+  options?: Options
+) => Server<ClientToServerEvents, ServerToClientEvents<ClientData>>
 
 /**
  * There are four scenarios:
@@ -35,94 +55,155 @@ declare module 'socket.io' {
  * We only consider scenario 3 for now, because It's easy to implement
  */
 
-export const createSocketServer = (httpServer: HTTPServer, persistence?: Persistence) => {
-  const roomMap = createRoomMap()
+export const createSocketIOServer: CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
+  httpServer: HTTPServer,
+  { getUserId, persistence, autoDeleteRoom = false }: Options = {}
+) => {
+  const roomMap: RoomMap = new Map()
 
-  const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
+  const io = new Server<ClientToServerEvents, ServerToClientEvents<ClientData>>(httpServer, {
     cors: process.env.NODE_ENV === 'development' ? {} : undefined
   })
 
   io.use((socket, next) => {
-    // handle auth and room permission
-    const { roomName } = socket.handshake.query
+    const { roomName, clientId } = socket.handshake.query
     if (typeof roomName !== 'string') {
       return next(new Error("wrong type of query parameter 'roomName'"))
     }
-    socket.yjs = { roomName }
+    if (typeof clientId !== 'string' || Number.isNaN(+clientId)) {
+      return next(new Error("wrong type of query parameter 'clientId'"))
+    }
+    socket.yjs = {
+      roomMap,
+      roomName,
+      clientId: Number(clientId)
+    }
+    return next()
+  })
+
+  io.use((socket, next) => {
+    const result = getUserId?.(socket) ?? socket.yjs.clientId
+    if (result instanceof Error) {
+      return next(result)
+    }
+    socket.userId = result
     return next()
   })
 
   const { adapter } = io.of('/')
 
+  const isDefaultRoom = (roomName: RoomName) => {
+    return adapter.sids.has(roomName)
+    //             ^^^^ Map<SocketId, Set<RoomName>>
+  }
+
   adapter.on('create-room', (roomName: RoomName) => {
-    // socket default room
-    if (adapter.sids.has(roomName)) {
+    if (isDefaultRoom(roomName) || roomMap.has(roomName)) {
       return
     }
-    const createRoom = async (): Promise<Room> => {
-      const doc = new Y.Doc()
+    const doc = new Y.Doc()
+    const awareness = new Awareness(doc)
+    // delete local `clientId` from `awareness.getStates()` Map
+    awareness.setLocalState(null)
+    awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
+      const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
+      const update = encodeAwarenessUpdate(awareness, changedClients)
+      io.to(roomName).except(origin).emit('awareness:update', update)
+    })
+    const prepareDoc = async (): Promise<Y.Doc> => {
       await persistence?.bindState(roomName, doc)
       doc.on('update', (updateV1: Uint8Array, origin: Socket['id']) => {
         const updateV2 = Y.convertUpdateFormatV1ToV2(updateV1)
         io.to(roomName).except(origin).emit('doc:update', updateV2)
       })
-      const awareness = new Awareness(doc)
-      // delete local `clientId` from `awareness.getStates()` Map
-      awareness.setLocalState(null)
-      awareness.on('update', (changes: AwarenessChanges, origin: Socket['id']) => {
-        const changedClients = Object.values(changes).reduce((res, cur) => [...res, ...cur])
-        const update = encodeAwarenessUpdate(awareness, changedClients)
-        io.to(roomName).except(origin).emit('awareness:update', update)
-      })
-      return { doc, awareness }
+      return doc
     }
-    roomMap.set(roomName, createRoom())
+    const preparingDoc = prepareDoc()
+    const room: Room = {
+      owner: null!,
+      awareness,
+      getDoc: () => preparingDoc,
+      destroy: async () => {
+        await persistence?.writeState(roomName, doc)
+        doc.destroy()
+        awareness.destroy()
+      }
+    }
+    roomMap.set(roomName, room)
   })
-  adapter.on('delete-room', (roomName: RoomName) => {
-    // socket default room
-    if (adapter.sids.has(roomName)) {
-      return
-    }
-    const loadingRoom = roomMap.get(roomName)!
-    const destroyRoom = async (): Promise<void> => {
-      const room = await loadingRoom
-      await persistence?.writeState(roomName, room.doc)
-      room.doc.destroy()
-      room.awareness.destroy()
-    }
-    void destroyRoom()
-    roomMap.delete(roomName)
-  })
+
+  if (autoDeleteRoom) {
+    adapter.on('delete-room', (roomName: RoomName) => {
+      if (isDefaultRoom(roomName) || !roomMap.has(roomName)) {
+        return
+      }
+      const room = roomMap.get(roomName)!
+      roomMap.delete(roomName)
+      room.destroy()
+    })
+  }
 
   io.on('connection', (socket) => {
     const { roomName } = socket.yjs
     socket.join(roomName)
-    roomMap.get(roomName)!.then((room) => {
-      const docDiff = Y.encodeStateVector(room.doc)
+
+    const room = roomMap.get(roomName)!
+    if (room.owner === null) {
+      room.owner = socket.userId
+    }
+    const clients = getClients(room.awareness)
+    if (clients.length) {
+      const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
+      socket.emit('awareness:update', awarenessUpdate)
+    }
+    room.getDoc().then((doc) => {
+      const docDiff = Y.encodeStateVector(doc)
       socket.emit('doc:diff', docDiff)
-      const awarenessStates = room.awareness.getStates()
-      if (awarenessStates.size) {
-        const clients = getClients(room.awareness)
-        const awarenessUpdate = encodeAwarenessUpdate(room.awareness, clients)
-        socket.emit('awareness:update', awarenessUpdate)
+    })
+
+    socket.on('room:close', () => {
+      const room = roomMap.get(roomName)
+      if (!room || socket.userId !== room.owner) {
+        return
       }
+      io.to(roomName).disconnectSockets()
+      roomMap.delete(roomName)
+      room.destroy()
     })
     socket.on('doc:diff', (diff) => {
-      roomMap.get(roomName)?.then((room) => {
-        const updateV2 = Y.encodeStateAsUpdateV2(room.doc, diff)
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      room.getDoc().then((doc) => {
+        const updateV2 = Y.encodeStateAsUpdateV2(doc, diff)
         socket.emit('doc:update', updateV2)
       })
     })
     socket.on('doc:update', (updateV2, callback) => {
-      roomMap.get(roomName)?.then((room) => {
-        Y.applyUpdateV2(room.doc, updateV2, socket.id)
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      room.getDoc().then((doc) => {
+        Y.applyUpdateV2(doc, updateV2, socket.id)
         callback?.()
       })
     })
     socket.on('awareness:update', (update) => {
-      roomMap.get(roomName)?.then((room) => {
-        applyAwarenessUpdate(room.awareness, update, socket.id)
-      })
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      applyAwarenessUpdate(room.awareness, update, socket.id)
+    })
+    socket.on('disconnect', () => {
+      const room = roomMap.get(roomName)
+      if (!room) {
+        return
+      }
+      const { clientId } = socket.yjs
+      removeAwarenessStates(room.awareness, [clientId], socket.id)
     })
   })
 

@@ -24,6 +24,14 @@
     // Completeness
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/**/*", "scripts/**/*"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    },
+    "require": ["tsconfig-paths/register"],
+    "swc": true,
+    "transpileOnly": true
+  }
 }

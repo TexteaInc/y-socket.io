@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "./scripts/server.ts",
+    "server:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch scripts/server.ts --watch ../src/server scripts/server.ts"
   },
   "dependencies": {
     "@textea/y-socket.io": "workspace:^",
@@ -15,10 +17,16 @@
     "yjs": "^13.5.41"
   },
   "devDependencies": {
+    "@swc/core": "^1.2.242",
+    "@types/node": "^18.7.13",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/web": "^0.0.72",
     "@vitejs/plugin-react": "^2.0.1",
+    "cross-env": "^7.0.3",
+    "nodemon": "^2.0.19",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.0",
     "typescript": "^4.6.4",
     "vite": "^3.0.7"
   }

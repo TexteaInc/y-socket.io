@@ -1,4 +1,4 @@
-import type { ClientId } from './types'
+import type { ClientId, DefaultClientData } from './types'
 
 type EventHandler = (...args: any[]) => void
 export type DefaultEvents = {
@@ -7,12 +7,15 @@ export type DefaultEvents = {
 
 type EventNameWithScope<Scope extends string, Type extends string = string> = `${Scope}:${Type}`
 
+type DataScope = 'data'
+type RoomScope = 'room'
+
 type YDocScope = 'doc'
 type AwarenessScope = 'awareness'
 type ObservableScope = YDocScope | AwarenessScope
 type ObservableEventName = EventNameWithScope<ObservableScope>
 
-type ValidEventScope = ObservableScope
+type ValidEventScope = DataScope | RoomScope | ObservableScope
 
 type ValidateEvents<
   Events extends DefaultEvents & {
@@ -24,17 +27,24 @@ type ValidateEvents<
   }
 > = Events
 
-export type ServerToClientEvents = ValidateEvents<{
+export type DefaultServerToClientEvents<ClientData extends DefaultClientData = DefaultClientData> = ValidateEvents<{
+  ['data:update']: (data: ClientData) => void
   ['doc:diff']: (diff: ArrayBuffer) => void
   ['doc:update']: (updateV2: ArrayBuffer) => void
   ['awareness:update']: (update: ArrayBuffer) => void
 }>
 
-export type ClientToServerEvents = ValidateEvents<{
+export interface ServerToClientEvents<ClientData extends DefaultClientData = DefaultClientData>
+  extends DefaultServerToClientEvents<ClientData> {}
+
+export type DefaultClientToServerEvents = ValidateEvents<{
+  ['room:close']: () => void
   ['doc:diff']: (diff: Uint8Array) => void
   ['doc:update']: (updateV2: Uint8Array, callback?: () => void) => void
   ['awareness:update']: (update: Uint8Array) => void
 }>
+
+export interface ClientToServerEvents extends DefaultClientToServerEvents {}
 
 type ClientToServerEventNames = keyof ClientToServerEvents
 
