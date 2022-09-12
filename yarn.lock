@@ -3009,6 +3009,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@textea/y-socket.io-example@workspace:example":
+  version: 0.0.0-use.local
+  resolution: "@textea/y-socket.io-example@workspace:example"
+  dependencies:
+    "@remirror/extension-yjs": ^3.0.0-beta.19
+    "@remirror/pm": ^2.0.0-beta.19
+    "@remirror/react": ^2.0.0-beta.19
+    "@swc/core": ^1.2.242
+    "@textea/y-socket.io": "workspace:^"
+    "@types/node": ^18.7.13
+    "@types/react": ^18.0.17
+    "@types/react-dom": ^18.0.6
+    "@types/web": ^0.0.72
+    "@vitejs/plugin-react": ^2.0.1
+    cross-env: ^7.0.3
+    nodemon: ^2.0.19
+    react: ^18.2.0
+    react-dom: ^18.2.0
+    remirror: ^2.0.0-beta.19
+    ts-node: ^10.9.1
+    tsconfig-paths: ^4.1.0
+    typescript: ^4.6.4
+    vite: ^3.0.7
+    y-prosemirror: ^1.1.3
+    y-protocols: ^1.0.5
+    yjs: ^13.5.41
+  languageName: unknown
+  linkType: soft
+
 "@textea/y-socket.io@workspace:., @textea/y-socket.io@workspace:^":
   version: 0.0.0-use.local
   resolution: "@textea/y-socket.io@workspace:."
@@ -10952,35 +10981,6 @@ __metadata:
   checksum: d19404a4ebafcf3761c28b881abe8c32ab6e457db0e5ffc7dbb749cbc2c3bb98e003a43f3e8eba7f245b2698c76f2c4cdd1c2db869f8ec0c6ef94736d9a88652
   languageName: node
   linkType: hard
-
-"y-socket.io-example@workspace:example":
-  version: 0.0.0-use.local
-  resolution: "y-socket.io-example@workspace:example"
-  dependencies:
-    "@remirror/extension-yjs": ^3.0.0-beta.19
-    "@remirror/pm": ^2.0.0-beta.19
-    "@remirror/react": ^2.0.0-beta.19
-    "@swc/core": ^1.2.242
-    "@textea/y-socket.io": "workspace:^"
-    "@types/node": ^18.7.13
-    "@types/react": ^18.0.17
-    "@types/react-dom": ^18.0.6
-    "@types/web": ^0.0.72
-    "@vitejs/plugin-react": ^2.0.1
-    cross-env: ^7.0.3
-    nodemon: ^2.0.19
-    react: ^18.2.0
-    react-dom: ^18.2.0
-    remirror: ^2.0.0-beta.19
-    ts-node: ^10.9.1
-    tsconfig-paths: ^4.1.0
-    typescript: ^4.6.4
-    vite: ^3.0.7
-    y-prosemirror: ^1.1.3
-    y-protocols: ^1.0.5
-    yjs: ^13.5.41
-  languageName: unknown
-  linkType: soft
 
 "y18n@npm:^5.0.5":
   version: 5.0.8
