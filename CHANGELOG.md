@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.0.0...y-socket.io-v1.1.0) (2022-09-12)
+
+
+### Features
+
+* basic permission control ([#13](https://github.com/TexteaInc/y-socket.io/issues/13)) ([7a891d5](https://github.com/TexteaInc/y-socket.io/commit/7a891d5b0f1e22bdb315b11ea9b5a3397928110a))
+
 ## [1.0.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v0.0.2...y-socket.io-v1.0.0) (2022-09-03)
 
 
