@@ -1,7 +1,6 @@
 {
-  "name": "y-socket.io-example",
+  "name": "@textea/y-socket.io-example",
   "private": true,
-  "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -9,10 +8,20 @@
     "server": "./scripts/server.ts",
     "server:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch scripts/server.ts --watch ../src/server scripts/server.ts"
   },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ],
   "dependencies": {
+    "@remirror/extension-yjs": "^3.0.0-beta.19",
+    "@remirror/pm": "^2.0.0-beta.19",
+    "@remirror/react": "^2.0.0-beta.19",
     "@textea/y-socket.io": "workspace:^",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "remirror": "^2.0.0-beta.19",
+    "y-prosemirror": "^1.1.3",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.41"
   },

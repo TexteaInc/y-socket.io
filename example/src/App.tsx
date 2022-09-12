@@ -1,5 +1,12 @@
+import 'remirror/styles/all.css'
+
+import { YjsExtension } from '@remirror/extension-yjs'
+import { Remirror, useRemirror } from '@remirror/react'
 import { useSocketIOProviderState } from '@textea/y-socket.io/hooks'
-import { createSocketIOProvider, SocketIOProvider } from '@textea/y-socket.io/provider'
+import {
+  createSocketIOProvider,
+  SocketIOProvider
+} from '@textea/y-socket.io/provider'
 import React, { useDeferredValue, useEffect, useState } from 'react'
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
@@ -7,7 +14,6 @@ import * as Y from 'yjs'
 import { ClientData } from './types'
 
 const yDoc = new Y.Doc()
-const yText = yDoc.getText()
 const roomId = 'test-id'
 
 const awareness = new Awareness(yDoc)
@@ -24,14 +30,30 @@ const DEFAULT_USER: Readonly<User> = {
 awareness.setLocalState(DEFAULT_USER)
 
 export const App: React.FC = () => {
-  const [text, setText] = useState('')
   const [userName, setUserName] = useState(DEFAULT_USER.name)
   const [otherUsers, setOtherUsers] = useState<User[]>([])
 
   const [provider, setProvider] = useState<SocketIOProvider<ClientData>>()
+  const { manager } = useRemirror({
+    extensions: () => [
+      new YjsExtension({
+        getProvider: () => ({
+          doc: yDoc,
+          awareness,
+          destroy: () => provider?.destroy(),
+          disconnect: () => provider?.disconnect()
+        })
+      })
+    ],
+    core: {
+      excludeExtensions: ['history']
+    }
+  })
 
-  const isConnecting = useSocketIOProviderState(provider, (state) => state.connecting)
-  const isConnected = useSocketIOProviderState(provider, (state) => state.connected)
+  const isConnecting = useSocketIOProviderState(provider,
+    (state) => state.connecting)
+  const isConnected = useSocketIOProviderState(provider,
+    (state) => state.connected)
   const isSynced = useSocketIOProviderState(provider, (state) => state.synced)
 
   const deferredIsSynced = useDeferredValue(isSynced)
@@ -55,29 +77,25 @@ export const App: React.FC = () => {
     : 'Not Available'
 
   useEffect(() => {
-    const yTextObserver = () => {
-      setText(yText.toJSON())
-    }
-    yText.observe(yTextObserver)
     const handleAwarenessUpdate = () => {
       const localUser = awareness.getLocalState() as User | null
       if (localUser) {
         setUserName(localUser.name)
       }
       setOtherUsers(
-        [...awareness.getStates().entries()]
-          .filter(([clientId]) => clientId !== yDoc.clientID)
+        [...awareness.getStates().entries()].filter(
+          ([clientId]) => clientId !== yDoc.clientID)
           .map(([, state]) => state as User)
       )
     }
     awareness.on('update', handleAwarenessUpdate)
-    const provider = createSocketIOProvider<ClientData>('ws://localhost:1234', roomId, yDoc, {
-      awareness,
-      autoConnect: false
-    })
+    const provider = createSocketIOProvider<ClientData>('ws://localhost:1234',
+      roomId, yDoc, {
+        awareness,
+        autoConnect: false
+      })
     setProvider(provider)
     return () => {
-      yText.unobserve(yTextObserver)
       awareness.off('update', handleAwarenessUpdate)
       provider.destroy()
     }
@@ -112,19 +130,9 @@ export const App: React.FC = () => {
       </p>
       <p>Status: {status}</p>
       <p>Role: {role}</p>
-      <p>
-        <label htmlFor='text'>Text: </label>
-        <input
-          id='text'
-          value={text}
-          onChange={(event) => {
-            yDoc.transact(() => {
-              yText.delete(0, yText.length)
-              yText.insert(0, event.target.value)
-            })
-          }}
-        />
-      </p>
+      <div className='remirror-theme'>
+        <Remirror manager={manager}/>
+      </div>
       <p>
         <label htmlFor='name'>Name: </label>
         <input
@@ -137,7 +145,7 @@ export const App: React.FC = () => {
       </p>
       {otherUsers.length > 0 && (
         <div>
-          <div>Users: </div>
+          <div>Users:</div>
           <ul>
             {otherUsers.map((user) => (
               <li key={user.id}>{user.name}</li>
