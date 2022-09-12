@@ -51,7 +51,7 @@ export const App: React.FC = () => {
       ? clientData.isOwner
         ? 'Admin'
         : 'User'
-      : 'Loading'
+      : 'Loading...'
     : 'Not Available'
 
   useEffect(() => {
@@ -93,14 +93,22 @@ export const App: React.FC = () => {
         <button
           onClick={() => {
             if (isConnected) {
-              provider?.disconnect()
+              provider.disconnect()
             } else {
-              provider?.connect()
+              provider.connect()
             }
           }}
         >
           {isConnected ? 'Disconnect' : 'Connect'}
         </button>
+        {role === 'Admin' && (
+          <>
+            <span>{' '}</span>
+            <button onClick={provider.closeRoom}>
+              Close Room
+            </button>
+          </>
+        )}
       </p>
       <p>Status: {status}</p>
       <p>Role: {role}</p>

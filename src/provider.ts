@@ -61,6 +61,7 @@ type SocketIOProviderStore<ClientData extends DefaultClientData> = ReadonlyStore
 export interface SocketIOProvider<ClientData extends DefaultClientData = DefaultClientData>
   extends SocketIOProviderStore<ClientData> {
   connect: () => void
+  closeRoom: () => void
   disconnect: () => void
   connectBroadcastChannel: () => void
   disconnectBroadcastChannel: () => void
@@ -256,6 +257,9 @@ export const createSocketIOProvider: CreateSocketIOProvider = <ClientData extend
         })
         socket.connect()
       }
+    },
+    closeRoom: () => {
+      socket.volatile.emit('room:close')
     },
     disconnect: () => {
       socket.disconnect()
