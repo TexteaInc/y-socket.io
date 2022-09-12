@@ -92,9 +92,13 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
 
   const { adapter } = io.of('/')
 
+  const isDefaultRoom = (roomName: RoomName) => {
+    return adapter.sids.has(roomName)
+    //             ^^^^ Map<SocketId, Set<RoomName>>
+  }
+
   adapter.on('create-room', (roomName: RoomName) => {
-    if (adapter.sids.has(roomName) || roomMap.has(roomName)) {
-      //        ^^^^ Map<SocketId, Set<RoomName>>
+    if (isDefaultRoom(roomName) || roomMap.has(roomName)) {
       return
     }
     const doc = new Y.Doc()
@@ -130,12 +134,12 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
 
   if (autoDeleteRoom) {
     adapter.on('delete-room', (roomName: RoomName) => {
-      const room = roomMap.get(roomName)
-      if (!room) {
+      if (isDefaultRoom(roomName) || !roomMap.has(roomName)) {
         return
       }
-      void room.destroy()
+      const room = roomMap.get(roomName)!
       roomMap.delete(roomName)
+      void room.destroy()
     })
   }
 
