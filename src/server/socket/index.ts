@@ -139,7 +139,7 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
       }
       const room = roomMap.get(roomName)!
       roomMap.delete(roomName)
-      void room.destroy()
+      room.destroy()
     })
   }
 
@@ -168,7 +168,7 @@ export const createSocketIOServer: CreateSocketIOServer = <ClientData extends De
       }
       io.to(roomName).disconnectSockets()
       roomMap.delete(roomName)
-      void room.destroy()
+      room.destroy()
     })
     socket.on('doc:diff', (diff) => {
       const room = roomMap.get(roomName)
