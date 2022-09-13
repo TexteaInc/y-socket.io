@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.2...y-socket.io-v1.1.3) (2022-09-13)
+
+
+### Bug Fixes
+
+* remove `prepublishOnly` ([ccd8646](https://github.com/TexteaInc/y-socket.io/commit/ccd86467cd356f2ac683191b70ebb211ae9362b3))
+
 ## [1.1.2](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.1...y-socket.io-v1.1.2) (2022-09-13)
 
 
