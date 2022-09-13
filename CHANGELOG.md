@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.1...y-socket.io-v1.1.2) (2022-09-13)
+
+
+### Bug Fixes
+
+* build before release ([f78d4d0](https://github.com/TexteaInc/y-socket.io/commit/f78d4d0c2d45572dac10aecacd69b5d62c440e8e))
+
 ## [1.1.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.0...y-socket.io-v1.1.1) (2022-09-13)
 
 
