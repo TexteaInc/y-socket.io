@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         if: ${{ steps.release.outputs.release_created }}
-      - name: Use Node.js 18.x
+      - name: Use Node.js LTS
         uses: actions/setup-node@v3
         if: ${{ steps.release.outputs.release_created }}
         with:
@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         if: ${{ steps.release.outputs.release_created }}
         run: yarn install
+      - name: Build
+        if: ${{ steps.release.outputs.release_created }}
+        run: yarn build
       - uses: JS-DevTools/npm-publish@v1
         name: Publish to npm
         if: ${{ steps.release.outputs.release_created }}
