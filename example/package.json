@@ -8,11 +8,6 @@
     "server": "./scripts/server.ts",
     "server:dev": "cross-env NODE_ENV=development DEBUG='socket.io:*' nodemon --watch scripts/server.ts --watch ../src/server scripts/server.ts"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ],
   "dependencies": {
     "@monaco-editor/react": "^4.4.5",
     "@textea/y-socket.io": "workspace:^",
