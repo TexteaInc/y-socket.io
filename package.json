@@ -1,11 +1,61 @@
 {
   "name": "@textea/y-socket.io",
   "version": "1.1.0",
+  "description": "Socket.io Connector for Yjs",
   "files": [
-    "dist",
-    "bin",
-    "yarn.lock"
+    "**"
   ],
+  "license": "MIT",
+  "keywords": [
+    "socket.io",
+    "react",
+    "yjs",
+    "yjs-provider"
+  ],
+  "repository": "https://github.com/TexteaInc/y-socket.io",
+  "bugs": {
+    "url": "https://github.com/TexteaInc/y-socket.io/issues"
+  },
+  "homepage": "https://github.com/TexteaInc/y-socket.io#readme",
+  "author": {
+    "name": "exuanbo",
+    "url": "https://github.com/exuanbo"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    "./server": {
+      "types": "./server/index.d.ts",
+      "import": "./server/index.js"
+    },
+    "./server/socket/*": {
+      "types": "./server/socket/*.d.ts",
+      "import": "./server/socket/*.js"
+    },
+    "./awareness": {
+      "types": "./awareness.d.ts",
+      "import": "./awareness.js"
+    },
+    "./events": {
+      "types": "./events.d.ts",
+      "import": "./events.js"
+    },
+    "./hooks": {
+      "types": "./hooks.d.ts",
+      "import": "./hooks.js"
+    },
+    "./persistence": {
+      "types": "./persistence.d.ts",
+      "import": "./persistence.js"
+    },
+    "./provider": {
+      "types": "./provider.d.ts",
+      "import": "./provider.js"
+    },
+    "./types": {
+      "types": "./types.d.ts",
+      "import": "./types.js"
+    }
+  },
   "bin": {
     "run-socketio-server": "./bin/run.ts"
   },
@@ -14,7 +64,8 @@
     "example"
   ],
   "scripts": {
-    "build": "tsc",
+    "copy": "shx cp LICENSE README.md package.json dist && shx cp -r bin dist",
+    "build": "tsc && yarn copy",
     "prepublishOnly": "npm run build",
     "start": "./bin/run.ts",
     "example": "yarn workspace y-socket.io-example dev",
@@ -58,6 +109,7 @@
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
+    "shx": "^0.3.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.3",
     "vite": "^3.1.0",
