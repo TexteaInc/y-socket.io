@@ -31,13 +31,8 @@ const DEFAULT_USER: Readonly<User> = {
 awareness.setLocalState(DEFAULT_USER)
 let _monacoBinding: MonacoBinding
 
-const defaultText = `
-  const text = 'Hello, world!'
-  console.log(text)
-`
-
 export const App: React.FC = () => {
-  const [text, setText] = useState(defaultText)
+  const [text, setText] = useState('')
   const [userName, setUserName] = useState(DEFAULT_USER.name)
   const [otherUsers, setOtherUsers] = useState<User[]>([])
 
@@ -134,7 +129,6 @@ export const App: React.FC = () => {
             awareness)
         }}
         value={text}
-        defaultValue={defaultText}
         onChange={
           (value) => {
             if (value) {
