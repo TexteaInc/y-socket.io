@@ -66,7 +66,6 @@
   "scripts": {
     "copy": "shx cp LICENSE README.md package.json dist && shx cp -r bin dist",
     "build": "tsc && yarn copy",
-    "prepublishOnly": "npm run build",
     "start": "./bin/run.ts",
     "example": "yarn workspace y-socket.io-example dev",
     "example:server": "yarn workspace y-socket.io-example server:dev",
