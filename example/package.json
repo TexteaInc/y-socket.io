@@ -14,14 +14,12 @@
     "not op_mini all"
   ],
   "dependencies": {
-    "@remirror/extension-yjs": "^3.0.0-beta.19",
-    "@remirror/pm": "^2.0.0-beta.19",
-    "@remirror/react": "^2.0.0-beta.19",
+    "@monaco-editor/react": "^4.4.5",
     "@textea/y-socket.io": "workspace:^",
+    "monaco-editor": "^0.34.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remirror": "^2.0.0-beta.19",
-    "y-prosemirror": "^1.1.3",
+    "y-monaco": "^0.1.4",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.41"
   },
@@ -36,7 +34,7 @@
     "nodemon": "^2.0.19",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",
-    "typescript": "^4.6.4",
+    "typescript": "^4.8.3",
     "vite": "^3.0.7"
   }
 }

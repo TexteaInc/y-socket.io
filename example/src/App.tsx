@@ -1,19 +1,20 @@
-import 'remirror/styles/all.css'
+import './index.css'
 
-import { YjsExtension } from '@remirror/extension-yjs'
-import { Remirror, useRemirror } from '@remirror/react'
+import Editor from '@monaco-editor/react'
 import { useSocketIOProviderState } from '@textea/y-socket.io/hooks'
 import {
   createSocketIOProvider,
   SocketIOProvider
 } from '@textea/y-socket.io/provider'
 import React, { useDeferredValue, useEffect, useState } from 'react'
+import { MonacoBinding } from 'y-monaco'
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
 import { ClientData } from './types'
 
 const yDoc = new Y.Doc()
+const type = yDoc.getText('javascript')
 const roomId = 'test-id'
 
 const awareness = new Awareness(yDoc)
@@ -28,27 +29,19 @@ const DEFAULT_USER: Readonly<User> = {
   name: `ID_${awareness.clientID.toString(16).toUpperCase()}`
 }
 awareness.setLocalState(DEFAULT_USER)
+let _monacoBinding: MonacoBinding
+
+const defaultText = `
+  const text = 'Hello, world!'
+  console.log(text)
+`
 
 export const App: React.FC = () => {
+  const [text, setText] = useState(defaultText)
   const [userName, setUserName] = useState(DEFAULT_USER.name)
   const [otherUsers, setOtherUsers] = useState<User[]>([])
 
   const [provider, setProvider] = useState<SocketIOProvider<ClientData>>()
-  const { manager } = useRemirror({
-    extensions: () => [
-      new YjsExtension({
-        getProvider: () => ({
-          doc: yDoc,
-          awareness,
-          destroy: () => provider?.destroy(),
-          disconnect: () => provider?.disconnect()
-        })
-      })
-    ],
-    core: {
-      excludeExtensions: ['history']
-    }
-  })
 
   const isConnecting = useSocketIOProviderState(provider,
     (state) => state.connecting)
@@ -130,9 +123,27 @@ export const App: React.FC = () => {
       </p>
       <p>Status: {status}</p>
       <p>Role: {role}</p>
-      <div className='remirror-theme'>
-        <Remirror manager={manager}/>
-      </div>
+      <Editor
+        height='400px'
+        onMount={(editor) => {
+          const model = editor.getModel()
+          if (model == null) {
+            throw new Error('model is null')
+          }
+          _monacoBinding = new MonacoBinding(type, model, new Set([editor]),
+            awareness)
+        }}
+        value={text}
+        defaultValue={defaultText}
+        onChange={
+          (value) => {
+            if (value) {
+              setText(value)
+            }
+          }
+        }
+        defaultLanguage='javascript'
+      />
       <p>
         <label htmlFor='name'>Name: </label>
         <input
