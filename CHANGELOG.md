@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.3...y-socket.io-v1.2.0) (2022-09-14)
+
+
+### Features
+
+* **example:** use monaco editor as example ([#19](https://github.com/TexteaInc/y-socket.io/issues/19)) ([6cdca49](https://github.com/TexteaInc/y-socket.io/commit/6cdca4909f9af975e72116f11f9f559937f2e08a))
+
 ## [1.1.3](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.2...y-socket.io-v1.1.3) (2022-09-13)
 
 
