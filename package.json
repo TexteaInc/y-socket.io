@@ -67,8 +67,8 @@
     "copy": "shx cp LICENSE README.md package.json dist && shx cp -r bin dist",
     "build": "tsc && yarn copy",
     "start": "./bin/run.ts",
-    "example": "yarn workspace y-socket.io-example dev",
-    "example:server": "yarn workspace y-socket.io-example server:dev",
+    "example": "yarn workspace @textea/y-socket.io-example dev",
+    "example:server": "yarn workspace @textea/y-socket.io-example server:dev",
     "test": "run -T vitest",
     "test:ui": "run -T vitest --ui",
     "test:run": "run -T vitest run"

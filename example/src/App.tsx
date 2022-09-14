@@ -1,13 +1,20 @@
+import './index.css'
+
+import Editor from '@monaco-editor/react'
 import { useSocketIOProviderState } from '@textea/y-socket.io/hooks'
-import { createSocketIOProvider, SocketIOProvider } from '@textea/y-socket.io/provider'
+import {
+  createSocketIOProvider,
+  SocketIOProvider
+} from '@textea/y-socket.io/provider'
 import React, { useDeferredValue, useEffect, useState } from 'react'
+import { MonacoBinding } from 'y-monaco'
 import { Awareness } from 'y-protocols/awareness'
 import * as Y from 'yjs'
 
 import { ClientData } from './types'
 
 const yDoc = new Y.Doc()
-const yText = yDoc.getText()
+const type = yDoc.getText('javascript')
 const roomId = 'test-id'
 
 const awareness = new Awareness(yDoc)
@@ -22,6 +29,7 @@ const DEFAULT_USER: Readonly<User> = {
   name: `ID_${awareness.clientID.toString(16).toUpperCase()}`
 }
 awareness.setLocalState(DEFAULT_USER)
+let _monacoBinding: MonacoBinding
 
 export const App: React.FC = () => {
   const [text, setText] = useState('')
@@ -30,8 +38,10 @@ export const App: React.FC = () => {
 
   const [provider, setProvider] = useState<SocketIOProvider<ClientData>>()
 
-  const isConnecting = useSocketIOProviderState(provider, (state) => state.connecting)
-  const isConnected = useSocketIOProviderState(provider, (state) => state.connected)
+  const isConnecting = useSocketIOProviderState(provider,
+    (state) => state.connecting)
+  const isConnected = useSocketIOProviderState(provider,
+    (state) => state.connected)
   const isSynced = useSocketIOProviderState(provider, (state) => state.synced)
 
   const deferredIsSynced = useDeferredValue(isSynced)
@@ -55,29 +65,25 @@ export const App: React.FC = () => {
     : 'Not Available'
 
   useEffect(() => {
-    const yTextObserver = () => {
-      setText(yText.toJSON())
-    }
-    yText.observe(yTextObserver)
     const handleAwarenessUpdate = () => {
       const localUser = awareness.getLocalState() as User | null
       if (localUser) {
         setUserName(localUser.name)
       }
       setOtherUsers(
-        [...awareness.getStates().entries()]
-          .filter(([clientId]) => clientId !== yDoc.clientID)
+        [...awareness.getStates().entries()].filter(
+          ([clientId]) => clientId !== yDoc.clientID)
           .map(([, state]) => state as User)
       )
     }
     awareness.on('update', handleAwarenessUpdate)
-    const provider = createSocketIOProvider<ClientData>('ws://localhost:1234', roomId, yDoc, {
-      awareness,
-      autoConnect: false
-    })
+    const provider = createSocketIOProvider<ClientData>('ws://localhost:1234',
+      roomId, yDoc, {
+        awareness,
+        autoConnect: false
+      })
     setProvider(provider)
     return () => {
-      yText.unobserve(yTextObserver)
       awareness.off('update', handleAwarenessUpdate)
       provider.destroy()
     }
@@ -112,19 +118,26 @@ export const App: React.FC = () => {
       </p>
       <p>Status: {status}</p>
       <p>Role: {role}</p>
-      <p>
-        <label htmlFor='text'>Text: </label>
-        <input
-          id='text'
-          value={text}
-          onChange={(event) => {
-            yDoc.transact(() => {
-              yText.delete(0, yText.length)
-              yText.insert(0, event.target.value)
-            })
-          }}
-        />
-      </p>
+      <Editor
+        height='400px'
+        onMount={(editor) => {
+          const model = editor.getModel()
+          if (model == null) {
+            throw new Error('model is null')
+          }
+          _monacoBinding = new MonacoBinding(type, model, new Set([editor]),
+            awareness)
+        }}
+        value={text}
+        onChange={
+          (value) => {
+            if (value) {
+              setText(value)
+            }
+          }
+        }
+        defaultLanguage='javascript'
+      />
       <p>
         <label htmlFor='name'>Name: </label>
         <input
@@ -137,7 +150,7 @@ export const App: React.FC = () => {
       </p>
       {otherUsers.length > 0 && (
         <div>
-          <div>Users: </div>
+          <div>Users:</div>
           <ul>
             {otherUsers.map((user) => (
               <li key={user.id}>{user.name}</li>
