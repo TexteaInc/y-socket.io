@@ -24,36 +24,39 @@
   "exports": {
     "./package.json": "./package.json",
     "./server": {
-      "types": "./server/index.d.ts",
-      "import": "./server/index.js"
-    },
-    "./server/socket/*": {
-      "types": "./server/socket/*.d.ts",
-      "import": "./server/socket/*.js"
+      "types": "./server.d.ts",
+      "import": "./server.mjs",
+      "default": "./server.js"
     },
     "./awareness": {
       "types": "./awareness.d.ts",
-      "import": "./awareness.js"
+      "import": "./awareness.mjs",
+      "default": "./awareness.js"
     },
     "./events": {
       "types": "./events.d.ts",
-      "import": "./events.js"
+      "import": "./events.mjs",
+      "default": "./events.js"
     },
     "./hooks": {
       "types": "./hooks.d.ts",
-      "import": "./hooks.js"
+      "import": "./hooks.mjs",
+      "default": "./hooks.js"
     },
     "./persistence": {
       "types": "./persistence.d.ts",
-      "import": "./persistence.js"
+      "import": "./persistence.mjs",
+      "default": "./persistence.js"
     },
     "./provider": {
       "types": "./provider.d.ts",
-      "import": "./provider.js"
+      "import": "./provider.mjs",
+      "default": "./provider.js"
     },
     "./types": {
       "types": "./types.d.ts",
-      "import": "./types.js"
+      "import": "./types.mjs",
+      "default": "./types.js"
     }
   },
   "bin": {
@@ -65,7 +68,7 @@
   ],
   "scripts": {
     "copy": "shx cp LICENSE README.md package.json dist && shx cp -r bin dist",
-    "build": "tsc && yarn copy",
+    "build": "rollup -c rollup.config.ts --configPlugin swc3",
     "start": "./bin/run.ts",
     "example": "yarn workspace @textea/y-socket.io-example dev",
     "example:server": "yarn workspace @textea/y-socket.io-example server:dev",
@@ -96,6 +99,10 @@
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-angular": "^17.1.0",
+    "@rollup/plugin-alias": "^4.0.0",
+    "@rollup/plugin-commonjs": "^23.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-replace": "^5.0.0",
     "@swc/core": "^1.3.9",
     "@textea/dev-kit": "^0.14.2",
     "@types/cookie": "^0.5.1",
@@ -108,6 +115,9 @@
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
+    "rollup": "^2.79.1",
+    "rollup-plugin-dts": "^4.2.3",
+    "rollup-plugin-swc3": "^0.6.0",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.4",

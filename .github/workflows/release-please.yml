@@ -32,7 +32,7 @@ jobs:
         run: yarn install
       - name: Build
         if: ${{ steps.release.outputs.release_created }}
-        run: yarn build
+        run: yarn build && yarn copy
       - uses: JS-DevTools/npm-publish@v1
         name: Publish to npm
         if: ${{ steps.release.outputs.release_created }}
