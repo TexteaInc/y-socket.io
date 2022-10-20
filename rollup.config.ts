@@ -3,7 +3,6 @@ import { basename, resolve } from 'node:path'
 
 import commonjs from '@rollup/plugin-commonjs'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
-import replace from '@rollup/plugin-replace'
 import type {
   ModuleFormat,
   OutputOptions,
@@ -22,13 +21,16 @@ const outputDir = resolve(__dirname, 'dist')
 const external = [
   'yjs',
   'zustand',
+  'zustand/middleware',
   'express',
   'socket.io',
   'socket.io-adapter',
   'socket.io-client',
   'use-sync-external-store',
+  'use-sync-external-store/with-selector',
   'uuid',
   'y-protocols',
+  'y-protocols/awareness',
   'react'
 ]
 const outputMatrix = (
@@ -49,7 +51,6 @@ const outputMatrix = (
 
 const buildMatrix = (input: string, output: string, config: {
   format: ModuleFormat[]
-  browser: boolean
   dts: boolean
 }): RollupOptions => {
   if (config.dts) {
@@ -59,13 +60,8 @@ const buildMatrix = (input: string, output: string, config: {
     input,
     output: outputMatrix(output, config.format),
     cache,
-    external: config.browser ? [] : external,
+    external,
     plugins: [
-      config.browser && replace({
-        preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify('production'),
-        'typeof window': JSON.stringify('object')
-      }),
       commonjs(),
       nodeResolve(),
       swc(defineRollupSwcOption({
@@ -104,37 +100,30 @@ const dtsMatrix = (): RollupOptions[] => {
 const build: RollupOptions[] = [
   buildMatrix('./src/server/index.ts', 'server', {
     format: ['es', 'umd'],
-    browser: false,
     dts: true
   }),
   buildMatrix('./src/awareness.ts', 'awareness', {
     format: ['es', 'umd'],
-    browser: true,
     dts: true
   }),
   buildMatrix('./src/events.ts', 'events', {
     format: ['es', 'umd'],
-    browser: true,
     dts: true
   }),
   buildMatrix('./src/hooks.ts', 'hooks', {
     format: ['es', 'umd'],
-    browser: true,
     dts: true
   }),
   buildMatrix('./src/persistence.ts', 'persistence', {
     format: ['es', 'umd'],
-    browser: true,
     dts: true
   }),
   buildMatrix('./src/provider.ts', 'provider', {
     format: ['es', 'umd'],
-    browser: true,
     dts: true
   }),
   buildMatrix('./src/types.ts', 'types', {
     format: ['es', 'umd'],
-    browser: true,
     dts: true
   }),
   ...dtsMatrix()
