@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.3.0...y-socket.io-v1.3.1) (2022-10-20)
+
+
+### Bug Fixes
+
+* rollup build ([87d7f80](https://github.com/TexteaInc/y-socket.io/commit/87d7f80ca859fa90918290f4287c07e41882f3a1))
+
 ## [1.3.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.2.1...y-socket.io-v1.3.0) (2022-10-20)
 
 
