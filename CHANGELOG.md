@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.2.0...y-socket.io-v1.2.1) (2022-10-20)
+
+
+### Bug Fixes
+
+* returns after destroy ([b2341c2](https://github.com/TexteaInc/y-socket.io/commit/b2341c2a0a2ae7ab1311282e1672672d2582ec69))
+
 ## [1.2.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.1.3...y-socket.io-v1.2.0) (2022-09-14)
 
 
