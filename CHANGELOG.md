@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.2.1...y-socket.io-v1.3.0) (2022-10-20)
+
+
+### Features
+
+* support cjs ([3961762](https://github.com/TexteaInc/y-socket.io/commit/3961762937542e61acf74f8daaf1e11eea0b5f2c))
+
 ## [1.2.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.2.0...y-socket.io-v1.2.1) (2022-10-20)
 
 
