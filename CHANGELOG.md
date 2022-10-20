@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.3.1...y-socket.io-v1.3.2) (2022-10-20)
+
+
+### Bug Fixes
+
+* import cannot find ([be9ab87](https://github.com/TexteaInc/y-socket.io/commit/be9ab87a2e2964533e6348840e3b8e3c64030ba8))
+
 ## [1.3.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.3.0...y-socket.io-v1.3.1) (2022-10-20)
 
 
