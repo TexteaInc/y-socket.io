@@ -1,6 +1,6 @@
 {
   "name": "@textea/y-socket.io",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Socket.io Connector for Yjs",
   "files": [
     "**"
