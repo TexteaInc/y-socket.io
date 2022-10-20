@@ -1,5 +1,5 @@
 import { useDebugValue } from 'react'
-import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector'
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector.js'
 
 import { INITIAL_STATE, SocketIOProvider, SocketIOProviderState } from './provider'
 import type { DefaultClientData } from './types'
