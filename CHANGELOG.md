@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.3.2...y-socket.io-v1.4.0) (2022-10-21)
+
+
+### Features
+
+* bypass cors config ([3a2fa34](https://github.com/TexteaInc/y-socket.io/commit/3a2fa349ab66c835a37f7dd076047514714c209e))
+
+
+### Bug Fixes
+
+* example ([06af6ef](https://github.com/TexteaInc/y-socket.io/commit/06af6ef89e465aac9befdd48a76bd0dedc4b25f2))
+
 ## [1.3.2](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.3.1...y-socket.io-v1.3.2) (2022-10-20)
 
 
