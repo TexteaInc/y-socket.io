@@ -13,7 +13,8 @@ const httpServer = createServer((request, response) => {
 })
 
 const io = createSocketIOServer<ClientData>(httpServer, {
-  autoDeleteRoom: process.env.NODE_ENV === 'development'
+  autoDeleteRoom: process.env.NODE_ENV === 'development',
+  cors: {}
 })
 
 io.on('connection', (socket) => {
