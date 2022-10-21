@@ -10,6 +10,7 @@ import type { ClientId, DefaultClientData, RoomName } from '../../types'
 import type { Room, RoomMap } from './room'
 import type { GetUserId, UserId } from './user'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
+import type { ServerOptions } from 'engine.io/build/server'
 
 declare module 'socket.io' {
   /**
@@ -40,6 +41,8 @@ export interface Options {
    * cors settings
    */
   cors?: CorsOptions | CorsOptionsDelegate
+
+  allowRequest?: ServerOptions['allowRequest']
 }
 
 type CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
@@ -62,12 +65,13 @@ type CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClien
 
 export const createSocketIOServer: CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
   httpServer: HTTPServer,
-  { getUserId, persistence, autoDeleteRoom = false, cors }: Options = {}
+  { getUserId, persistence, autoDeleteRoom = false, cors, allowRequest }: Options = {}
 ) => {
   const roomMap: RoomMap = new Map()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents<ClientData>>(httpServer, {
-    cors
+    cors,
+    allowRequest
   })
 
   io.use((socket, next) => {
