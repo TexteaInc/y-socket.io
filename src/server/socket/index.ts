@@ -9,6 +9,7 @@ import type { Persistence } from '../../persistence'
 import type { ClientId, DefaultClientData, RoomName } from '../../types'
 import type { Room, RoomMap } from './room'
 import type { GetUserId, UserId } from './user'
+import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 
 declare module 'socket.io' {
   /**
@@ -35,6 +36,10 @@ export interface Options {
    * @default false
    */
   autoDeleteRoom?: boolean
+  /**
+   * cors settings
+   */
+  cors?: CorsOptions | CorsOptionsDelegate
 }
 
 type CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
@@ -57,12 +62,12 @@ type CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClien
 
 export const createSocketIOServer: CreateSocketIOServer = <ClientData extends DefaultClientData = DefaultClientData>(
   httpServer: HTTPServer,
-  { getUserId, persistence, autoDeleteRoom = false }: Options = {}
+  { getUserId, persistence, autoDeleteRoom = false, cors }: Options = {}
 ) => {
   const roomMap: RoomMap = new Map()
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents<ClientData>>(httpServer, {
-    cors: process.env.NODE_ENV === 'development' ? {} : undefined
+    cors
   })
 
   io.use((socket, next) => {
