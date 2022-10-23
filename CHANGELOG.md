@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.4.0...y-socket.io-v1.4.1) (2022-10-23)
+
+
+### Miscellaneous Chores
+
+* bump version ([52128b3](https://github.com/TexteaInc/y-socket.io/commit/52128b3fd5240878a2d892d7fb31b369a35d10d7))
+
 ## [1.4.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.3.2...y-socket.io-v1.4.0) (2022-10-21)
 
 
