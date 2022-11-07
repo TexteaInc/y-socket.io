@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.4.1...y-socket.io-v1.5.0) (2022-11-07)
+
+
+### Features
+
+* support `allowRequest` ([be85b33](https://github.com/TexteaInc/y-socket.io/commit/be85b337f74fa8b1d44d59ee0c1f6c933244ecb3))
+
+
+### Bug Fixes
+
+* make `zustand` a peerDependencies ([b6675cf](https://github.com/TexteaInc/y-socket.io/commit/b6675cf85c4a140762b0f8c2bf6ec2091891c6b5))
+
 ## [1.4.1](https://github.com/TexteaInc/y-socket.io/compare/y-socket.io-v1.4.0...y-socket.io-v1.4.1) (2022-10-23)
 
 
