@@ -1,7 +1,5 @@
 # @textea/y-socket.io
 
-[View example code](example/src/App.tsx)
-
 ## Features
 
 - [x] React Enhancement like `<Room/>`, `<SocketIOProvider/>`...
@@ -18,6 +16,21 @@ yarn add @textea/y-socket.io
 # or
 pnpm install @textea/y-socket.io
 ```
+
+```ts
+import * as Y from 'yjs'
+import { createSocketIOProvider } from '@textea/y-socket.io/provider'
+const doc = new Y.Doc()
+
+const provider = createSocketIOProvider('ws://localhost:1234', 'my-room', doc)
+provider.subscribe(state => state.error, error => {
+  if (error) {
+    console.error('socket.io provider error', error)
+  }
+})
+```
+
+[View example code with React.js](example/src/App.tsx)
 
 ## Document
 
